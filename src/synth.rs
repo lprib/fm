@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::f64::consts::PI;
 
 pub struct Program {
@@ -5,6 +6,38 @@ pub struct Program {
     pub nodes: Vec<Box<dyn DspNode>>,
     pub mono: bool,
     pub sample_rate: u32,
+}
+
+impl Program {
+    pub fn from_node_graph(graph: NodeGraph, mono: bool, sample_rate: u32) -> Self {
+        // map enum into trait object
+        let nodes: Vec<Box<dyn DspNode>> = graph
+            .0
+            .into_iter()
+            .map(|x| -> Box<dyn DspNode> {
+                match x {
+                    DspNodeEnum::Adsr(x) => Box::new(x) as _,
+                    DspNodeEnum::SinOsc(x) => Box::new(x) as _,
+                }
+            })
+            .collect();
+        Program {
+            state: ProgramState::new(100),
+            nodes,
+            mono,
+            sample_rate,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct NodeGraph(pub Vec<DspNodeEnum>);
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum DspNodeEnum {
+    Adsr(Adsr),
+    SinOsc(SinOsc),
 }
 
 impl Program {
@@ -49,6 +82,8 @@ impl ProgramState {
     }
 }
 
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum InPort {
     Link(usize),
     Const(f64),
@@ -69,6 +104,8 @@ impl Default for InPort {
     }
 }
 
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum OutPort {
     Link(usize),
     Unused,
@@ -92,6 +129,8 @@ pub trait DspNode {
     fn next_sample(&mut self, state: &mut ProgramState);
 }
 
+#[derive(Serialize, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
 pub struct SinOsc {
     pub freq: InPort,
     pub phase: InPort,
@@ -117,6 +156,7 @@ impl SinOsc {
             feedback,
             mult,
             out,
+            ..Default::default()
         }
     }
 }
@@ -134,6 +174,8 @@ impl DspNode for SinOsc {
     }
 }
 
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub struct Adsr {
     pub gate: InPort,
     pub a: InPort,
@@ -142,12 +184,35 @@ pub struct Adsr {
     pub r: InPort,
     pub out: OutPort,
     // Time of most recent gate rising edge
+    #[serde(skip)]
     gate_start: f64,
     // Time of most recent gate falling edge
+    #[serde(skip)]
     gate_end: f64,
     // previous value of gate, to detect edges
+    #[serde(skip)]
     prev_gate: bool,
+    #[serde(skip)]
     releasing: bool,
+}
+
+impl Default for Adsr {
+    fn default() -> Self {
+        Adsr {
+            gate: Default::default(),
+            a: Default::default(),
+            d: Default::default(),
+            s: Default::default(),
+            r: Default::default(),
+            out: Default::default(),
+            // We must init these to -Inf, because then the ADSR will assume the 'previous' gate is
+            // long passed and should ouput zero as an initial state.
+            gate_start: f64::NEG_INFINITY,
+            gate_end: f64::NEG_INFINITY,
+            prev_gate: false,
+            releasing: false,
+        }
+    }
 }
 
 impl Adsr {
@@ -159,12 +224,7 @@ impl Adsr {
             s,
             r,
             out,
-            // We must init these to -Inf, because then the ADSR will assume the 'previous' gate is
-            // long passed and should ouput zero as an initial state.
-            gate_start: f64::NEG_INFINITY,
-            gate_end: f64::NEG_INFINITY,
-            prev_gate: false,
-            releasing: false,
+            ..Default::default()
         }
     }
 
