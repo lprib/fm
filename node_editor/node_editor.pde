@@ -130,8 +130,12 @@ void keyPressed() {
         // Remove all links that connect to this node
         ArrayList<Link> toRemove = new ArrayList<Link>();
         for(Link l: links) {
-          if(l.inputPort.parent == highlightedNode || l.outputPort.parent == highlightedNode) {
+          if(
+            l.inputPort.parent == highlightedNode ||
+            l.outputPort.parent == highlightedNode
+          ) {
             toRemove.add(l);
+            l.notifyUnlink();
           }
         }
         links.removeAll(toRemove);
@@ -202,11 +206,13 @@ boolean createLink(Port start, Port end) {
     for(Link other: links) {
       if(other.inputPort == input) {
         toRemove = other;
+        other.notifyUnlink();
       }
     }
     links.remove(toRemove);
 
     linkStartedPort = null;
+    l.notifyLink();
     links.add(l);
     return true;
   }
@@ -241,13 +247,13 @@ class Node {
   public ArrayList<Port> ports = new ArrayList<Port>();
   public String name;
   float x, y = 0;
-  float w = 75;
+  float w = 100;
   float h;
 
   // y location from top of node to the title underline
   float titleUnderlineYOffset = myTextSize + 5;
   // y location from top of node to the center of the first port
-  float portsYOffset = myTextSize + 15;
+  float portsYOffset = myTextSize + 20;
   // y spacing between each port
   float portSpacing = 25;
 
@@ -322,9 +328,12 @@ class Port {
   public int index;
   public String name;
 
-  public float ellipseSize = 20;
+  public boolean isLinked = false;
 
-  public float nodeTextInset = 10;
+  public float ellipseSize = 20;
+  public float linkEllipseSize = 10;
+
+  public float nodeTextInset = 15;
 
   public Port(Node parent, int index, boolean isInput, String name) {
     this.parent = parent;
@@ -352,6 +361,11 @@ class Port {
 
     ellipseMode(CENTER);
     ellipse(x, y, ellipseSize, ellipseSize);
+
+    if(isLinked) {
+      fill(normalColor);
+      ellipse(x, y, linkEllipseSize, linkEllipseSize);
+    }
 
     fill(normalColor);
     if(isInput) {
@@ -392,5 +406,15 @@ class Link {
     Location startLoc = outputPort.getAbsoluteLocation();
     Location endLoc = inputPort.getAbsoluteLocation();
     line(startLoc.x, startLoc.y, endLoc.x, endLoc.y);
+  }
+
+  public void notifyLink() {
+    outputPort.isLinked = true;
+    inputPort.isLinked = true;
+  }
+
+  public void notifyUnlink() {
+    outputPort.isLinked = false;
+    inputPort.isLinked = false;
   }
 }
