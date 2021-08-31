@@ -2,37 +2,43 @@ HashMap<String, NodeDescription> nodeTypes = new HashMap<String, NodeDescription
   put("adsr", new NodeDescription(
     new String[] {"gate", "a", "d", "s", "r"},
     new String[] {"out"},
-    "adsr"
+    "adsr",
+    true
   ));
 
   put("sinosc", new NodeDescription(
     new String[] {"freq", "phase", "vol", "feedback", "mult"},
     new String[] {"out"},
-    "sinosc"
+    "sinosc",
+    true
   ));
 
   put("freq", new NodeDescription(
     new String[] {},
     new String[] {"out"},
-    "freq"
+    "freq",
+    false
   ));
 
   put("gate", new NodeDescription(
     new String[] {},
     new String[] {"out"},
-    "gate"
+    "gate",
+    false
   ));
 
   put("lchan", new NodeDescription(
     new String[] {"in"},
     new String[] {},
-    "lchan"
+    "lchan",
+    false
   ));
 
   put("rchan", new NodeDescription(
     new String[] {"in"},
     new String[] {},
-    "rchan"
+    "rchan",
+    false
   ));
 }};
 
@@ -42,18 +48,23 @@ ArrayList<Link> links = new ArrayList<Link>();
 Node highlightedNode = null;
 
 // currently highlighted port, can be null if none highlighted
-PortDescription highlightedPort = null;
+Port highlightedPort = null;
 
 // If a link has been started, this will be non-null.
-// TODO draw link in progress
-PortDescription linkStartedPort = null;
+Port linkStartedPort = null;
 
 // text size
 float myTextSize = 12;
 
+
+color normalColor = color(0, 0, 0);
+color highlightColor = color(100, 100, 255);
+color nodeFillColor = color(220, 220, 255);
+
 void setup() {
   size(600, 600);
   textSize(myTextSize);
+  initScene();
 }
 
 void draw() {
@@ -72,8 +83,8 @@ void draw() {
 
   // draw nodes
   for(Node n: nodes) {
-    boolean hlNode = (n == highlightedNode);
-    n.draw(hlNode, highlightedPort);
+    boolean isHighlighted = (n == highlightedNode);
+    n.draw(isHighlighted, highlightedPort);
   }
   // draw links
   for(Link l: links) {
@@ -81,28 +92,28 @@ void draw() {
   }
   
   // draw in-progress links
+  stroke(0);
   if(linkStartedPort != null) {
-    // TODO extract this out to a method of PortDescription
-    Location start = linkStartedPort.parent.getPortLoc(linkStartedPort.isInput, linkStartedPort.idx);
+    Location start = linkStartedPort.getAbsoluteLocation();
     line(start.x, start.y, mouseX, mouseY);
   }
 }
 
-PortDescription getHighlightedPort() {
+void initScene() {
+  String[] types = {"freq", "gate", "lchan", "rchan"};
+  for(int i = 0; i < types.length; i++) {
+    Node n = new Node(nodeTypes.get(types[i]));
+    n.x = 10;
+    n.y = i*50;
+    nodes.add(n);
+  }
+}
+
+Port getHighlightedPort() {
   for(Node n: nodes) {
-    // Check all input ports for node
-    for(int i = 0; i < n.desc.inputs.length; i++) {
-      Location l = n.getPortLoc(true, i);
-      if(dist(l.x, l.y, mouseX, mouseY) <= 20) {
-        return new PortDescription(n, true, i);
-      }
-    }
-    // Check all output ports for node
-    for(int i = 0; i < n.desc.outputs.length; i++) {
-      Location l = n.getPortLoc(false, i);
-      if(dist(l.x, l.y, mouseX, mouseY) <= 20) {
-        return new PortDescription(n, false, i);
-      }
+    Port check = n.portNearPoint(mouseX, mouseY);
+    if(check != null) {
+      return check;
     }
   }
   return null;
@@ -159,26 +170,36 @@ void createNode(String type) {
   nodes.add(newNode);
 }
 
-boolean createLink(PortDescription start, PortDescription end) {
+// returns whether link creation was successful
+boolean createLink(Port start, Port end) {
   if(
     // Node cannot link to itsself
     (start.parent != end.parent) &&
     // Output cannot link to output and vice versa
     (start.isInput != end.isInput)
   ) {
+    Port output = !start.isInput ? start : end;
+    Port input = start.isInput ? start : end;
 
     // TODO check if a link already goes in to the input port, since inputs can
     // only have a single driver
-    Link l = new Link(linkStartedPort, highlightedPort);
+    Link l = new Link(output, input);
     for(Link other: links) {
-      if(
-        (l.start.equals(other.start) && l.end.equals(other.end)) ||
-        (l.end.equals(other.start) && l.end.equals(other.start))
-      ) {
+      if(other.outputPort == output && other.inputPort == input){
         println("Attempt to create duplicate link");
         return false;
       }
     }
+
+    // If another link already goes in to the specified input port, this link
+    // should override and remove it
+    Link toRemove = null;
+    for(Link other: links) {
+      if(other.inputPort == input) {
+        toRemove = other;
+      }
+    }
+    links.remove(toRemove);
 
     linkStartedPort = null;
     links.add(l);
@@ -191,8 +212,9 @@ class NodeDescription {
   public String[] inputs;
   public String[] outputs;
   public String name;
+  public boolean deletable;
 
-  public NodeDescription(String[] inputs, String[] outputs, String name) {
+  public NodeDescription(String[] inputs, String[] outputs, String name, boolean deletable) {
     this.inputs = inputs;
     this.outputs = outputs;
     this.name = name;
@@ -202,87 +224,61 @@ class NodeDescription {
 class Location {
   public float x;
   public float y;
-}
 
-class PortDescription {
-  public Node parent;
-  public boolean isInput;
-  public int idx;
-
-  public PortDescription(Node parent, boolean isInput, int idx) {
-    this.parent = parent;
-    this.isInput = isInput;
-    this.idx = idx;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null) { return false; }
-    if (obj.getClass() != this.getClass()) { return false; }
-    PortDescription other = (PortDescription) obj;
-    if(other.parent != parent) { return false; }
-    if(other.isInput != isInput) { return false; }
-    if(other.idx != idx) { return false; }
-    return true;
+  public Location(float x, float y) {
+    this.x = x;
+    this.y = y;
   }
 }
 
 class Node {
   public boolean mouse_snapped = false;
-  public NodeDescription desc;
-  float x, y;
+  public ArrayList<Port> ports = new ArrayList<Port>();
+  public String name;
+  float x, y = 0;
   float w = 75;
   float h;
 
-  float textH = myTextSize;
-  float textPad = 10;
+  // y location from top of node to the title underline
+  float titleUnderlineYOffset = myTextSize + 5;
+  // y location from top of node to the center of the first port
+  float portsYOffset = myTextSize + 15;
+  // y spacing between each port
+  float portSpacing = 25;
 
   public Node(NodeDescription desc) {
-    this.desc = desc;
-    int numRows = max(desc.inputs.length, desc.outputs.length) + 1;
-    this.h = numRows * (textH + textPad);
+    int numRows = max(desc.inputs.length, desc.outputs.length);
+    this.h = portsYOffset + numRows * portSpacing;
+    this.name = desc.name;
+    initPorts(desc);
   }
 
-  // find xy of given port
-  public Location getPortLoc(boolean isInput, int idx) {
-    Location l = new Location();
-    if(isInput) {
-      l.x = x;
-      l.y = y + (idx+1)*(textH + textPad);
-    } else {
-      l.x = x + w;
-      l.y = y + (idx+1)*(textH + textPad);
-    }
-    return l;
+  void initPorts(NodeDescription desc) {
+    for(int i = 0; i < desc.inputs.length; i++) ports.add(new Port(this, i, true, desc.inputs[i]));
+    for(int i = 0; i < desc.outputs.length; i++) ports.add(new Port(this, i, false, desc.outputs[i]));
   }
 
-  // find nearest port on this node of type input/output to the location xy
-  public int nearestPortIdxTo(boolean isInput, float x, float y) {
-    int nearestIdx = 0;
-    float minDistance = 10000000;
-
-    for(int i = 0; i < (isInput ? desc.inputs.length : desc.outputs.length); i++) {
-      Location l = getPortLoc(isInput, i);
-      float d = dist(l.x, l.y, x, y);
-      if(d < minDistance) {
-        nearestIdx = i;
-        minDistance = d;
+  // returns a Port if xy is within a port's selection area, else null
+  public Port portNearPoint(float x, float y) {
+    for(Port p: ports) {
+      Location l = p.getAbsoluteLocation();
+      if(dist(x, y, l.x, l.y) <= p.ellipseSize) {
+        return p;
       }
     }
-    return nearestIdx;
+    return null;
   }
 
   public boolean isPointInside(float x, float y) {
     return x >= this.x && y >= this.y && x <= this.x + this.w && y <= this.y + this.h;
   }
 
-  public void draw(boolean highlighted, PortDescription highlightPort) {
-
-    strokeWeight(2);
+  public void draw(boolean highlighted, Port highlightedPort) {
+    strokeWeight(1);
     if (highlighted) {
-      stroke(0, 0, 255);
+      stroke(highlightColor);
     } else {
-      stroke(0);
+      stroke(normalColor);
     }
 
     if(mouse_snapped) {
@@ -292,71 +288,100 @@ class Node {
 
     pushMatrix();
     translate(x, y);
-    fill(255);
+    fill(nodeFillColor);
     rect(0, 0, w, h);
+    // underline node title
+    line(0, titleUnderlineYOffset, w, titleUnderlineYOffset);
 
     textAlign(CENTER, TOP);
-    fill(0);
-    text(desc.name, w/2, 0);
+    fill(normalColor);
+    text(name, w/2, 0);
 
-
-    ellipseMode(CENTER);
-    // Draw inputs
-    textAlign(LEFT, CENTER);
-    for (int i = 0; i < desc.inputs.length; i++) {
-      float yval = (i+1)*(textH + textPad);
-      fill(255);
-      ellipse(0, yval, 20, 20);
-      if(
-          highlightPort != null &&
-          highlightPort.parent == this &&
-          highlightPort.isInput &&
-          highlightPort.idx == i
-      ) {
-        fill(0, 0, 255);
-        ellipse(0, yval, 10, 10);
-      }
-      fill(0);
-      text(desc.inputs[i], 10, yval);
+    for(Port p: ports) {
+      p.draw(highlightedPort == p);
     }
-
-    // Draw outputs
-    textAlign(RIGHT, CENTER);
-    for (int i = 0; i < desc.outputs.length; i++) {
-      float yval = (i+1)*(textH + textPad);
-      fill(255);
-      ellipse(w, yval, 20, 20);
-      if(
-          highlightPort != null &&
-          highlightPort.parent == this &&
-          !highlightPort.isInput &&
-          highlightPort.idx == i
-      ) {
-        fill(0, 0, 255);
-        ellipse(w, yval, 10, 10);
-      }
-      fill(0);
-      text(desc.outputs[i], w-10, yval);
-    }
-
 
     popMatrix();
   }
 }
 
-class Link {
-  PortDescription start;
-  PortDescription end;
+class Port {
+  // relative to parent
+  public float x, y;
+  public Node parent;
+  public boolean isInput;
+  public int index;
+  public String name;
 
-  public Link(PortDescription start, PortDescription end) {
-    this.start = start;
-    this.end = end;
+  public float ellipseSize = 20;
+
+  public float nodeTextInset = 10;
+
+  public Port(Node parent, int index, boolean isInput, String name) {
+    this.parent = parent;
+    // Place on left if input, else right
+    this.x = (isInput ? 0 : parent.w);
+    this.y = parent.portsYOffset + index * parent.portSpacing;
+    this.isInput = isInput;
+    this.index = index;
+    this.name = name;
+  }
+
+  public Location getAbsoluteLocation() {
+    return new Location(parent.x + x, parent.y + y);
+  }
+
+  // When this is called, the coordinate system must already be translated to
+  // be relative to parent's location
+  public void draw(boolean highlighted) {
+    stroke(0);
+    if(highlighted) {
+      fill(highlightColor);
+    } else {
+      fill(nodeFillColor);
+    }
+
+    ellipseMode(CENTER);
+    ellipse(x, y, ellipseSize, ellipseSize);
+
+    fill(normalColor);
+    if(isInput) {
+      textAlign(LEFT, CENTER);
+      text(name, x + nodeTextInset, y);
+    } else {
+      textAlign(RIGHT, CENTER);
+      text(name, x - nodeTextInset, y);
+    }
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) { return false; }
+    if (obj.getClass() != this.getClass()) { return false; }
+    Port other = (Port) obj;
+    if(other.parent != parent) { return false; }
+    if(other.isInput != isInput) { return false; }
+    if(other.index != index) { return false; }
+    return true;
+  }
+}
+
+class Link {
+  Port outputPort;
+  Port inputPort;
+
+  public Link(Port outputPort, Port inputPort) {
+    if(outputPort.isInput || !inputPort.isInput) {
+      throw new IllegalArgumentException("start must be an output port, end must be an input port");
+    }
+    this.outputPort = outputPort;
+    this.inputPort = inputPort;
   }
 
   public void draw() {
-    Location startLoc = start.parent.getPortLoc(start.isInput, start.idx);
-    Location endLoc = end.parent.getPortLoc(end.isInput, end.idx);
     stroke(0);
+    Location startLoc = outputPort.getAbsoluteLocation();
+    Location endLoc = inputPort.getAbsoluteLocation();
     line(startLoc.x, startLoc.y, endLoc.x, endLoc.y);
   }
 }
