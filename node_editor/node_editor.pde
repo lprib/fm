@@ -127,9 +127,16 @@ void keyPressed() {
         highlightedNode.mouse_snapped = !highlightedNode.mouse_snapped;
         break;
       case '\b':
+        // Remove all links that connect to this node
+        ArrayList<Link> toRemove = new ArrayList<Link>();
+        for(Link l: links) {
+          if(l.inputPort.parent == highlightedNode || l.outputPort.parent == highlightedNode) {
+            toRemove.add(l);
+          }
+        }
+        links.removeAll(toRemove);
         nodes.remove(highlightedNode);
         highlightedNode = null;
-        //TODO remove all links that connect to this node
     }
   }
   // Other actions
@@ -181,8 +188,6 @@ boolean createLink(Port start, Port end) {
     Port output = !start.isInput ? start : end;
     Port input = start.isInput ? start : end;
 
-    // TODO check if a link already goes in to the input port, since inputs can
-    // only have a single driver
     Link l = new Link(output, input);
     for(Link other: links) {
       if(other.outputPort == output && other.inputPort == input){
@@ -254,8 +259,12 @@ class Node {
   }
 
   void initPorts(NodeDescription desc) {
-    for(int i = 0; i < desc.inputs.length; i++) ports.add(new Port(this, i, true, desc.inputs[i]));
-    for(int i = 0; i < desc.outputs.length; i++) ports.add(new Port(this, i, false, desc.outputs[i]));
+    for(int i = 0; i < desc.inputs.length; i++) {
+      ports.add(new Port(this, i, true, desc.inputs[i]));
+    }
+    for(int i = 0; i < desc.outputs.length; i++) {
+      ports.add(new Port(this, i, false, desc.outputs[i]));
+    }
   }
 
   // returns a Port if xy is within a port's selection area, else null
