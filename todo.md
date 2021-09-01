@@ -5,8 +5,10 @@
 - [ ] Topological sort
 - [ ] MIDI input
 - [ ] Unison span input and unison support
+- [ ] MIDI mod wheel input?
 - [ ] Detect long runs of DspNode that do not depend on anything else and run in parallel
 - [ ] Support for attenuation on port inputs
+- [ ] Lower level compilation to remove all the indirection of port.read(state). Ie. reduce DspNodes to single functions which can be chained?
 
 ## Node editor
 - [ ] allow metadata tags for nodes (color, custom name, etc.)
