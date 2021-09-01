@@ -3,6 +3,7 @@ HashMap<String, NodeDescription> nodeTypes = new HashMap<String, NodeDescription
     new String[] {"gate", "a", "d", "s", "r"},
     new String[] {"out"},
     "adsr",
+    false,
     false
   ));
 
@@ -10,6 +11,7 @@ HashMap<String, NodeDescription> nodeTypes = new HashMap<String, NodeDescription
     new String[] {"freq", "phase", "vol", "feedback", "mult"},
     new String[] {"out"},
     "sinosc",
+    false,
     false
   ));
 
@@ -17,6 +19,7 @@ HashMap<String, NodeDescription> nodeTypes = new HashMap<String, NodeDescription
     new String[] {"in1", "in2", "in3", "mix1", "mix2", "mix3"},
     new String[] {"out"},
     "mixer",
+    false,
     false
   ));
 
@@ -24,6 +27,7 @@ HashMap<String, NodeDescription> nodeTypes = new HashMap<String, NodeDescription
     new String[] {},
     new String[] {"out"},
     "freq",
+    true,
     true
   ));
 
@@ -31,6 +35,7 @@ HashMap<String, NodeDescription> nodeTypes = new HashMap<String, NodeDescription
     new String[] {},
     new String[] {"out"},
     "gate",
+    true,
     true
   ));
 
@@ -38,14 +43,16 @@ HashMap<String, NodeDescription> nodeTypes = new HashMap<String, NodeDescription
     new String[] {"in"},
     new String[] {},
     "lchan",
-    true
+    true,
+    false
   ));
 
   put("rchan", new NodeDescription(
     new String[] {"in"},
     new String[] {},
     "rchan",
-    true
+    true,
+    false
   ));
 }};
 
@@ -55,12 +62,17 @@ class NodeDescription {
   public String name;
   public boolean intrinsic;
 
+  // If this node type is an intrinsic node, determines whether it is a signal
+  // producer or consumer
+  public boolean intrinsicProducer;
+
   // specialIndex can be null if none
-  public NodeDescription(String[] inputs, String[] outputs, String name, boolean intrinsic) {
+  public NodeDescription(String[] inputs, String[] outputs, String name, boolean intrinsic, boolean intrinsicProducer) {
     this.inputs = inputs;
     this.outputs = outputs;
     this.name = name;
     this.intrinsic = intrinsic;
+    this.intrinsicProducer = intrinsicProducer;
   }
 }
 

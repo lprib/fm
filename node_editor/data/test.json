@@ -1,0 +1,56 @@
+{
+	"nodes": [
+		{
+			"a": {
+				"const": 1
+			},
+			"r": {
+				"const": 4
+			},
+			"s": {
+				"const": 3
+			},
+			"d": {
+				"const": 2
+			},
+			"_x": 272,
+			"_y": 217.5,
+			"gate": {
+				"link": 0
+			},
+			"type": "adsr",
+			"out": {
+				"link": 3
+			}
+		},
+		{
+			"phase": {
+				"const": 0
+			},
+			"feedback": {
+				"const": 0
+			},
+			"vol": {
+				"link": 3
+			},
+			"mult": {
+				"const": 2
+			},
+			"freq": {
+				"link": 1
+			},
+			"_x": 517,
+			"_y": 134.5,
+			"type": "sinosc",
+			"out": {
+				"link": 2
+			}
+		}
+	],
+	"io": {
+		"rchan": 2,
+		"freq": 1,
+		"gate": 0,
+		"lchan": 2
+	}
+}

@@ -25,7 +25,7 @@ color highlightColor = color(230, 230, 255);
 void setup() {
   size(1200, 600);
   textSize(myTextSize);
-  initScene();
+  initScene(nodes);
 }
 
 void draw() {
@@ -59,15 +59,6 @@ void draw() {
   }
 }
 
-void initScene() {
-  String[] types = {"freq", "gate", "lchan", "rchan"};
-  for(int i = 0; i < types.length; i++) {
-    Node n = new Node(nodeTypes.get(types[i]));
-    n.x = 10;
-    n.y = i*80;
-    nodes.add(n);
-  }
-}
 
 Port getHighlightedPort() {
   for(Node n: nodes) {
@@ -84,7 +75,7 @@ void keyPressed() {
   switch(key) {
     case ' ':
       // move highlighted node
-      if(highlightedNode != null) {
+      if(highlightedNode != null && !highlightedNode.desc.intrinsic) {
         highlightedNode.mouse_snapped = !highlightedNode.mouse_snapped;
       }
       break;
@@ -161,6 +152,12 @@ void keyPressed() {
       break;
     case 'p':
       compile(nodes, links);
+      break;
+    case 'l':
+      String filename = JOptionPane.showInputDialog(frame, "Filename");
+      Program p = loadProgram(loadJSONObject(filename));
+      nodes = p.nodes;
+      links = p.links;
       break;
   }
 }
