@@ -56,7 +56,7 @@ impl Program {
     }
 
     pub fn set_gate(&mut self, gate: bool) {
-        if let Some(i) = self.io.freq {
+        if let Some(i) = self.io.gate {
             self.state.links[i] = if gate { 1.0 } else { 0.0 };
         }
     }
