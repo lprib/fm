@@ -1,0 +1,134 @@
+{
+    "nodes": [
+        {
+            "phase": {"link": 9},
+            "feedback": {"const": 0},
+            "vol": {"link": 2},
+            "mult": {"const": 1},
+            "freq": {"link": 0},
+            "_x": 766,
+            "_y": 7.5,
+            "type": "sinosc",
+            "out": {"link": 10}
+        },
+        {
+            "phase": {"const": 0},
+            "feedback": {"const": 0},
+            "vol": {"link": 4},
+            "mult": {"const": 1},
+            "freq": {"const": 12},
+            "_x": 221,
+            "_y": 430.5,
+            "type": "sinosc",
+            "out": {"link": 1}
+        },
+        {
+            "mix3": {"const": 0},
+            "mix2": {"const": 1},
+            "mix1": {"const": 0.5},
+            "_x": 382,
+            "_y": 408,
+            "type": "mixer",
+            "in2": {"const": 0.5},
+            "in1": {"link": 1},
+            "in3": {"const": 0},
+            "out": {"link": 2}
+        },
+        {
+            "a": {"const": 0.5},
+            "r": {"const": 0},
+            "s": {"const": 0},
+            "d": {"const": 4},
+            "_x": 71,
+            "_y": 428.5,
+            "gate": {"link": 3},
+            "type": "adsr",
+            "out": {"link": 4}
+        },
+        {
+            "phase": {"const": 0},
+            "feedback": {"const": 0},
+            "vol": {"link": 5},
+            "mult": {"const": 2.75},
+            "freq": {"link": 0},
+            "_x": 360,
+            "_y": 240.5,
+            "type": "sinosc",
+            "out": {"link": 8}
+        },
+        {
+            "a": {"const": 1},
+            "r": {"const": 0},
+            "s": {"const": 0},
+            "d": {"const": 1},
+            "_x": 216,
+            "_y": 243.5,
+            "gate": {"link": 3},
+            "type": "adsr",
+            "out": {"link": 5}
+        },
+        {
+            "a": {"const": 0.009999999776482582},
+            "r": {"const": 0},
+            "s": {"const": 0.20000000298023224},
+            "d": {"const": 4},
+            "_x": 214,
+            "_y": 78.5,
+            "gate": {"link": 3},
+            "type": "adsr",
+            "out": {"link": 6}
+        },
+        {
+            "phase": {"const": 0},
+            "feedback": {"const": 0},
+            "vol": {"link": 6},
+            "mult": {"const": 1.5},
+            "freq": {"link": 0},
+            "_x": 366,
+            "_y": 74.5,
+            "type": "sinosc",
+            "out": {"link": 7}
+        },
+        {
+            "mix3": {"const": 0},
+            "mix2": {"const": 2},
+            "mix1": {"const": 0.20000000298023224},
+            "_x": 569,
+            "_y": 76,
+            "type": "mixer",
+            "in2": {"link": 8},
+            "in1": {"link": 7},
+            "in3": {"const": 0},
+            "out": {"link": 9}
+        },
+        {
+            "a": {"const": 0.20000000298023224},
+            "r": {"const": 1},
+            "s": {"const": 0.800000011920929},
+            "d": {"const": 0.20000000298023224},
+            "_x": 738,
+            "_y": 332.5,
+            "gate": {"link": 3},
+            "type": "adsr",
+            "out": {"link": 12}
+        },
+        {
+            "mix3": {"const": 0},
+            "mix2": {"const": 0},
+            "mix1": {"link": 12},
+            "_x": 916,
+            "_y": 116,
+            "type": "mixer",
+            "in2": {"const": 0},
+            "in1": {"link": 10},
+            "in3": {"const": 0},
+            "out": {"link": 11}
+        }
+    ],
+    "io": {
+        "rchan": 11,
+        "freq": 0,
+        "gate": 3,
+        "lchan": 11
+    }
+}

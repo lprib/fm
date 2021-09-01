@@ -12,9 +12,9 @@ class Port {
   public float value = 0.0;
 
   // drawing constants
-  public final float ellipseSize = 20;
-  public final float linkEllipseSize = 8;
-  public final float nodeTextInset = 15;
+  public final float ellipseSize = 15;
+  public final float linkEllipseSize = 7;
+  public final float nodeTextInset = 8;
 
   public Port(Node parent, int index, boolean isInput, String name) {
     this.parent = parent;

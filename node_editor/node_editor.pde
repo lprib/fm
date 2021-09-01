@@ -143,12 +143,14 @@ void keyPressed() {
       // edit node value
       if(highlightedPort != null) {
         String input = JOptionPane.showInputDialog(frame, "Enter Value");
-        try {
-          float value = Float.parseFloat(input);
-          highlightedPort.value = value;
-        } catch(Exception e) {
-          // ignore
-          println("invalid input: " + input);
+        if(input != null) {
+          try {
+            float value = Float.parseFloat(input);
+            highlightedPort.value = value;
+          } catch(Exception e) {
+            // ignore
+            println("invalid input: " + input);
+          }
         }
       }
       break;

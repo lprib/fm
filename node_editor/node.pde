@@ -89,7 +89,7 @@ class Node {
   // y location from top of node to the center of the first port
   float portsYOffset = myTextSize + 20;
   // y spacing between each port
-  float portSpacing = 25;
+  float portSpacing = 15;
 
   public Node(NodeDescription desc) {
     int numRows = max(desc.inputs.length, desc.outputs.length);

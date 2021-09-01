@@ -13,6 +13,7 @@ use rodio::{buffer::SamplesBuffer, OutputStream, Sink};
 const SAMPLE_RATE: u32 = 44100;
 
 fn main() {
+    println!("start compute");
     let patch = fs::read_to_string("../node_editor/data/test3.json").expect("couldnt read file");
     let mut patch: Patch = serde_json::from_str(&patch).expect("couldnt parse");
     // let mut patch: Patch = example_patch().into();
@@ -29,6 +30,7 @@ fn main() {
         samples[i * 2] = next_sample.0 as f32;
         samples[i * 2 + 1] = next_sample.1 as f32;
     }
+    println!("end compute");
 
     let buf = SamplesBuffer::new(2, SAMPLE_RATE, samples);
 
