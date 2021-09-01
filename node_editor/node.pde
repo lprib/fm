@@ -1,3 +1,54 @@
+HashMap<String, NodeDescription> nodeTypes = new HashMap<String, NodeDescription>() {{
+  put("adsr", new NodeDescription(
+    new String[] {"gate", "a", "d", "s", "r"},
+    new String[] {"out"},
+    "adsr",
+    false
+  ));
+
+  put("sinosc", new NodeDescription(
+    new String[] {"freq", "phase", "vol", "feedback", "mult"},
+    new String[] {"out"},
+    "sinosc",
+    false
+  ));
+
+  put("mixer", new NodeDescription(
+    new String[] {"in1", "in2", "in3", "mix1", "mix2", "mix3"},
+    new String[] {"out"},
+    "mixer",
+    false
+  ));
+
+  put("freq", new NodeDescription(
+    new String[] {},
+    new String[] {"out"},
+    "freq",
+    true
+  ));
+
+  put("gate", new NodeDescription(
+    new String[] {},
+    new String[] {"out"},
+    "gate",
+    true
+  ));
+
+  put("lchan", new NodeDescription(
+    new String[] {"in"},
+    new String[] {},
+    "lchan",
+    true
+  ));
+
+  put("rchan", new NodeDescription(
+    new String[] {"in"},
+    new String[] {},
+    "rchan",
+    true
+  ));
+}};
+
 class NodeDescription {
   public String[] inputs;
   public String[] outputs;
