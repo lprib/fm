@@ -5,42 +5,49 @@ HashMap<String, NodeDescription> nodeTypes = new HashMap<String, NodeDescription
     new String[] {"gate", "a", "d", "s", "r"},
     new String[] {"out"},
     "adsr",
-    true
+    false
   ));
 
   put("sinosc", new NodeDescription(
     new String[] {"freq", "phase", "vol", "feedback", "mult"},
     new String[] {"out"},
     "sinosc",
-    true
+    false
+  ));
+
+  put("mixer", new NodeDescription(
+    new String[] {"in1", "in2", "in3", "mix1", "mix2", "mix3"},
+    new String[] {"out"},
+    "mixer",
+    false
   ));
 
   put("freq", new NodeDescription(
     new String[] {},
     new String[] {"out"},
     "freq",
-    false
+    true
   ));
 
   put("gate", new NodeDescription(
     new String[] {},
     new String[] {"out"},
     "gate",
-    false
+    true
   ));
 
   put("lchan", new NodeDescription(
     new String[] {"in"},
     new String[] {},
     "lchan",
-    false
+    true
   ));
 
   put("rchan", new NodeDescription(
     new String[] {"in"},
     new String[] {},
     "rchan",
-    false
+    true
   ));
 }};
 
@@ -62,6 +69,7 @@ float myTextSize = 12;
 color uiColor = color(0, 0, 0);
 color linkColor = color(0, 100, 200);
 color nodeFillColor = color(200, 200, 255);
+color intrinsicNodeFillColor = color(210, 250, 255);
 color highlightColor = color(230, 230, 255);
 
 void setup() {
@@ -141,7 +149,7 @@ void keyPressed() {
           }
         }
         links.removeAll(toRemove);
-      } else if(highlightedNode != null && highlightedNode.deletable) {
+      } else if(highlightedNode != null && !highlightedNode.desc.intrinsic) {
         // Remove all links that connect to this node
         ArrayList<Link> toRemove = new ArrayList<Link>();
         for(Link l: links) {
@@ -166,6 +174,8 @@ void keyPressed() {
       // create asdr
       createNode("adsr");
       break;
+    case 'm':
+      createNode("mixer");
     case 'c':
       // connect link
       if(linkStartedPort == null) {
@@ -198,6 +208,9 @@ void keyPressed() {
           println("invalid input: " + input);
         }
       }
+      break;
+    case 'p':
+      compile(nodes, links);
       break;
   }
 }

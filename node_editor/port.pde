@@ -75,6 +75,7 @@ class Port {
     numLinks--;
   }
 
+  // TODO is the necessary, or can we just compare references?
   @Override
   public boolean equals(Object obj) {
     if (obj == null) { return false; }

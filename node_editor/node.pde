@@ -1,8 +1,22 @@
+class NodeDescription {
+  public String[] inputs;
+  public String[] outputs;
+  public String name;
+  public boolean intrinsic;
+
+  // specialIndex can be null if none
+  public NodeDescription(String[] inputs, String[] outputs, String name, boolean intrinsic) {
+    this.inputs = inputs;
+    this.outputs = outputs;
+    this.name = name;
+    this.intrinsic = intrinsic;
+  }
+}
+
 class Node {
   public boolean mouse_snapped = false;
   public ArrayList<Port> ports = new ArrayList<Port>();
-  public String name;
-  public boolean deletable;
+  public NodeDescription desc;
   float x, y = 0;
   float w = 100;
   float h;
@@ -17,12 +31,11 @@ class Node {
   public Node(NodeDescription desc) {
     int numRows = max(desc.inputs.length, desc.outputs.length);
     this.h = portsYOffset + numRows * portSpacing;
-    this.name = desc.name;
-    this.deletable = desc.deletable;
-    initPorts(desc);
+    this.desc = desc;
+    initPorts();
   }
 
-  void initPorts(NodeDescription desc) {
+  void initPorts() {
     for(int i = 0; i < desc.inputs.length; i++) {
       ports.add(new Port(this, i, true, desc.inputs[i]));
     }
@@ -52,7 +65,7 @@ class Node {
     if (highlighted) {
       fill(highlightColor);
     } else {
-      fill(nodeFillColor);
+      fill(desc.intrinsic ? intrinsicNodeFillColor : nodeFillColor);
     }
 
     if(mouse_snapped) {
@@ -68,7 +81,7 @@ class Node {
 
     textAlign(CENTER, TOP);
     fill(uiColor);
-    text(name, w/2, 0);
+    text(desc.name, w/2, 0);
 
     for(Port p: ports) {
       p.draw(highlightedPort == p);

@@ -1,17 +1,3 @@
-class NodeDescription {
-  public String[] inputs;
-  public String[] outputs;
-  public String name;
-  public boolean deletable;
-
-  public NodeDescription(String[] inputs, String[] outputs, String name, boolean deletable) {
-    this.inputs = inputs;
-    this.outputs = outputs;
-    this.name = name;
-    this.deletable = deletable;
-  }
-}
-
 class Location {
   public float x;
   public float y;

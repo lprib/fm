@@ -31,10 +31,12 @@ impl Program {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct NodeGraph(pub Vec<DspNodeEnum>);
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
+#[serde(tag = "type")]
 pub enum DspNodeEnum {
     Adsr(Adsr),
     SinOsc(SinOsc),
@@ -137,6 +139,7 @@ pub struct SinOsc {
     pub vol: InPort,
     pub feedback: InPort,
     pub mult: InPort,
+    #[serde(default)]
     pub out: OutPort,
 }
 
@@ -182,6 +185,7 @@ pub struct Adsr {
     pub d: InPort,
     pub s: InPort,
     pub r: InPort,
+    #[serde(default)]
     pub out: OutPort,
     // Time of most recent gate rising edge
     #[serde(skip)]
