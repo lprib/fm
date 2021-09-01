@@ -1,6 +1,6 @@
 use super::{
     serialized::{InPort, OutPort},
-    DspNode, ProgramState,
+    DspNode, SynthState,
 };
 use serde::{Deserialize, Serialize};
 
@@ -66,7 +66,7 @@ impl Adsr {
 }
 
 impl DspNode for Adsr {
-    fn next_sample(&mut self, state: &mut ProgramState) {
+    fn next_sample(&mut self, state: &mut SynthState) {
         let gate = Self::gate_on(self.gate.read(state));
 
         // Set up gate start and end markers on rising/falling edges of gate.

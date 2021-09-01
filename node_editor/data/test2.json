@@ -1,0 +1,54 @@
+{
+    "nodes": [
+        {
+            "a": {"const": 0.009999999776482582},
+            "r": {"const": 0},
+            "s": {"const": 0},
+            "d": {"const": 0.5},
+            "_x": 168,
+            "_y": 215.5,
+            "gate": {"link": 2},
+            "type": "adsr",
+            "out": {"link": 5}
+        },
+        {
+            "a": {"const": 0.009999999776482582},
+            "r": {"const": 0.5},
+            "s": {"const": 0.5},
+            "d": {"const": 0.20000000298023224},
+            "_x": 324,
+            "_y": 30.5,
+            "gate": {"link": 2},
+            "type": "adsr",
+            "out": {"link": 3}
+        },
+        {
+            "phase": {"const": 0},
+            "feedback": {"const": 0},
+            "vol": {"link": 5},
+            "mult": {"const": 3},
+            "freq": {"link": 1},
+            "_x": 393,
+            "_y": 202.5,
+            "type": "sinosc",
+            "out": {"link": 0}
+        },
+        {
+            "phase": {"link": 0},
+            "feedback": {"const": 0},
+            "vol": {"link": 3},
+            "mult": {"const": 1},
+            "freq": {"link": 1},
+            "_x": 632,
+            "_y": 74.5,
+            "type": "sinosc",
+            "out": {"link": 4}
+        }
+    ],
+    "io": {
+        "rchan": 4,
+        "freq": 1,
+        "gate": 2,
+        "lchan": 4
+    }
+}

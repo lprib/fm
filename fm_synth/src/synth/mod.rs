@@ -1,19 +1,20 @@
 pub mod adsr;
+pub mod mixer;
 pub mod serialized;
 pub mod sinosc;
 
 use serde::{Deserialize, Serialize};
-use serialized::{InPort, OutPort, ProgramDefinition, IO};
+use serialized::{PatchDefinition, IO};
 
 pub trait DspNode {
-    fn next_sample(&mut self, state: &mut ProgramState);
+    fn next_sample(&mut self, state: &mut SynthState);
 }
 
 #[derive(Serialize, Deserialize)]
-#[serde(from = "ProgramDefinition")]
-pub struct Program {
+#[serde(from = "PatchDefinition")]
+pub struct Patch {
     #[serde(skip)]
-    pub state: ProgramState,
+    pub state: SynthState,
     #[serde(skip)]
     pub nodes: Vec<Box<dyn DspNode>>,
     #[serde(skip)]
@@ -22,21 +23,21 @@ pub struct Program {
     pub sample_rate: u32,
 }
 
-pub struct ProgramState {
+pub struct SynthState {
     links: Vec<f64>,
     t: f64,
 }
 
-impl ProgramState {
+impl SynthState {
     pub fn new(num_links: usize) -> Self {
-        ProgramState {
+        SynthState {
             links: vec![0.0; num_links],
             t: 0.0,
         }
     }
 }
 
-impl Program {
+impl Patch {
     pub fn next_sample(&mut self) -> (f64, f64) {
         for node in &mut self.nodes {
             node.next_sample(&mut self.state);

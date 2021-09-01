@@ -1,56 +1,56 @@
 {
 	"nodes": [
 		{
-			"a": {
-				"const": 1
-			},
-			"r": {
-				"const": 4
-			},
-			"s": {
-				"const": 3
-			},
-			"d": {
-				"const": 2
-			},
-			"_x": 272,
-			"_y": 217.5,
+			"type": "adsr",
 			"gate": {
 				"link": 0
 			},
-			"type": "adsr",
+			"a": {
+				"const": 0.01
+			},
+			"d": {
+				"const": 0.2
+			},
+			"s": {
+				"const": 0.5
+			},
+			"r": {
+				"const": 0.5
+			},
 			"out": {
 				"link": 3
-			}
+			},
+			"_x": 200,
+			"_y": 50
 		},
 		{
-			"phase": {
-				"const": 0
+			"type": "sinosc",
+			"freq": {
+				"link": 1
 			},
-			"feedback": {
+			"phase": {
 				"const": 0
 			},
 			"vol": {
 				"link": 3
 			},
+			"feedback": {
+				"const": 0
+			},
 			"mult": {
-				"const": 2
+				"const": 1
 			},
-			"freq": {
-				"link": 1
-			},
-			"_x": 517,
-			"_y": 134.5,
-			"type": "sinosc",
 			"out": {
 				"link": 2
-			}
+			},
+			"_x": 350,
+			"_y": 50
 		}
 	],
 	"io": {
-		"rchan": 2,
 		"freq": 1,
 		"gate": 0,
-		"lchan": 2
+		"lchan": 2,
+		"rchan": 2
 	}
 }

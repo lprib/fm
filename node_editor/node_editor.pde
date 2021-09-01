@@ -3,6 +3,8 @@ import javax.swing.JOptionPane;
 ArrayList<Node> nodes = new ArrayList<Node>();
 ArrayList<Link> links = new ArrayList<Link>();
 
+String currentFilename = "";
+
 // currently highlighted node, can be null if none highlighted
 Node highlightedNode = null;
 
@@ -151,11 +153,15 @@ void keyPressed() {
       }
       break;
     case 'p':
-      compile(nodes, links);
+      String saveFilename = JOptionPane.showInputDialog(frame, "Filename", currentFilename);
+      currentFilename = saveFilename;
+      JSONObject compiled = compile(nodes, links);
+      saveJSONObject(compiled, saveFilename, "indent=4");
       break;
     case 'l':
-      String filename = JOptionPane.showInputDialog(frame, "Filename");
-      Program p = loadProgram(loadJSONObject(filename));
+      String loadFilename = JOptionPane.showInputDialog(frame, "Filename", currentFilename);
+      currentFilename = loadFilename;
+      Program p = loadProgram(loadJSONObject(loadFilename));
       nodes = p.nodes;
       links = p.links;
       break;

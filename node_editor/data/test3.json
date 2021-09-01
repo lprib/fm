@@ -1,0 +1,66 @@
+{
+    "nodes": [
+        {
+            "a": {"const": 0.009999999776482582},
+            "r": {"const": 0.5},
+            "s": {"const": 0.800000011920929},
+            "d": {"const": 0.5},
+            "_x": 387,
+            "_y": 9.5,
+            "gate": {"link": 0},
+            "type": "adsr",
+            "out": {"link": 4}
+        },
+        {
+            "a": {"const": 5},
+            "r": {"const": 0},
+            "s": {"const": 1},
+            "d": {"const": 0},
+            "_x": 120,
+            "_y": 296.5,
+            "gate": {"link": 0},
+            "type": "adsr",
+            "out": {"link": 1}
+        },
+        {
+            "phase": {"const": 0},
+            "feedback": {"const": 0},
+            "vol": {"link": 1},
+            "mult": {"const": 1},
+            "freq": {"const": 5},
+            "_x": 297,
+            "_y": 295.5,
+            "type": "sinosc",
+            "out": {"link": 5}
+        },
+        {
+            "mix3": {"const": 0},
+            "mix2": {"const": 0.5},
+            "mix1": {"const": 1},
+            "_x": 540,
+            "_y": 211,
+            "type": "mixer",
+            "in2": {"link": 5},
+            "in1": {"link": 3},
+            "in3": {"const": 0},
+            "out": {"link": 2}
+        },
+        {
+            "phase": {"const": 0},
+            "feedback": {"const": 0},
+            "vol": {"link": 4},
+            "mult": {"const": 1},
+            "freq": {"link": 2},
+            "_x": 762,
+            "_y": 63.5,
+            "type": "sinosc",
+            "out": {"link": 6}
+        }
+    ],
+    "io": {
+        "rchan": 6,
+        "freq": 3,
+        "gate": 0,
+        "lchan": 6
+    }
+}

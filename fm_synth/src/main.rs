@@ -1,26 +1,30 @@
 mod synth;
 
+use std::fs;
+
 use crate::synth::{
     adsr::Adsr,
-    serialized::{DspNodeEnum, InPort, OutPort, ProgramDefinition, IO},
+    serialized::{DspNodeEnum, InPort, OutPort, PatchDefinition, IO},
     sinosc::SinOsc,
-    Program,
+    Patch,
 };
 use rodio::{buffer::SamplesBuffer, OutputStream, Sink};
 
 const SAMPLE_RATE: u32 = 44100;
 
 fn main() {
-    let mut program: Program = example_program().into();
+    let patch = fs::read_to_string("../node_editor/data/test3.json").expect("couldnt read file");
+    let mut patch: Patch = serde_json::from_str(&patch).expect("couldnt parse");
+    // let mut patch: Patch = example_patch().into();
     let mut samples = vec![0.0; 5 * 2 * SAMPLE_RATE as usize];
 
-    program.set_gate(true);
-    program.set_freq(440.0);
+    patch.set_gate(true);
+    patch.set_freq(440.0);
     for i in 0..samples.len() / 2 {
         if i * 2 >= 3 * samples.len() / 4 {
-            program.set_gate(false);
+            patch.set_gate(false);
         }
-        let next_sample = program.next_sample();
+        let next_sample = patch.next_sample();
         // println!("{} {}", next_sample.0, next_sample.1);
         samples[i * 2] = next_sample.0 as f32;
         samples[i * 2 + 1] = next_sample.1 as f32;
@@ -38,8 +42,8 @@ fn main() {
     // println!("{}", json);
 }
 
-fn example_program() -> ProgramDefinition {
-    ProgramDefinition {
+fn example_patch() -> PatchDefinition {
+    PatchDefinition {
         nodes: vec![
             DspNodeEnum::Adsr(Adsr::new(
                 InPort::Link(0),

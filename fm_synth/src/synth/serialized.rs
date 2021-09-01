@@ -1,8 +1,8 @@
-use super::{adsr::Adsr, sinosc::SinOsc, DspNode, Program, ProgramState};
+use super::{adsr::Adsr, mixer::Mixer, sinosc::SinOsc, DspNode, Patch, SynthState};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
-pub struct ProgramDefinition {
+pub struct PatchDefinition {
     pub nodes: Vec<DspNodeEnum>,
     pub io: IO,
 }
@@ -13,6 +13,7 @@ pub struct ProgramDefinition {
 pub enum DspNodeEnum {
     Adsr(Adsr),
     SinOsc(SinOsc),
+    Mixer(Mixer),
 }
 
 #[derive(Serialize, Deserialize, Default)]
@@ -43,7 +44,7 @@ pub enum OutPort {
 }
 
 impl InPort {
-    pub fn read(&self, state: &ProgramState) -> f64 {
+    pub fn read(&self, state: &SynthState) -> f64 {
         match *self {
             Self::Link(i) => state.links[i],
             Self::Const(n) => n,
@@ -58,7 +59,7 @@ impl Default for InPort {
 }
 
 impl OutPort {
-    pub fn write(&self, val: f64, state: &mut ProgramState) {
+    pub fn write(&self, val: f64, state: &mut SynthState) {
         if let OutPort::Link(i) = *self {
             state.links[i] = val
         }
@@ -71,8 +72,8 @@ impl Default for OutPort {
     }
 }
 
-impl From<ProgramDefinition> for Program {
-    fn from(def: ProgramDefinition) -> Self {
+impl From<PatchDefinition> for Patch {
+    fn from(def: PatchDefinition) -> Self {
         // map enum into trait object
         let dyn_nodes: Vec<Box<dyn DspNode>> = def
             .nodes
@@ -81,11 +82,12 @@ impl From<ProgramDefinition> for Program {
                 match x {
                     DspNodeEnum::Adsr(x) => Box::new(x) as _,
                     DspNodeEnum::SinOsc(x) => Box::new(x) as _,
+                    DspNodeEnum::Mixer(x) => Box::new(x) as _,
                 }
             })
             .collect();
-        Program {
-            state: ProgramState::new(100),
+        Patch {
+            state: SynthState::new(100),
             nodes: dyn_nodes,
             io: def.io,
             sample_rate: 44100,

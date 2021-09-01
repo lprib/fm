@@ -1,6 +1,6 @@
 use super::{
     serialized::{InPort, OutPort},
-    DspNode, ProgramState,
+    DspNode, SynthState,
 };
 use serde::{Deserialize, Serialize};
 use std::f64::consts::PI;
@@ -39,7 +39,7 @@ impl SinOsc {
 }
 
 impl DspNode for SinOsc {
-    fn next_sample(&mut self, state: &mut ProgramState) {
+    fn next_sample(&mut self, state: &mut SynthState) {
         let vol = self.vol.read(state);
         let freq = self.freq.read(state);
         let phase = self.phase.read(state);

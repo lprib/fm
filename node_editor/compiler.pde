@@ -1,4 +1,7 @@
-String compile(ArrayList<Node> nodes, ArrayList<Link> links) {
+// TODO serparate into serializable classes, and do JSON conversion as a
+// separate step
+
+JSONObject compile(ArrayList<Node> nodes, ArrayList<Link> links) {
   HashMap<Port, Integer> allocations = allocateLinks(links);
   println("COMPILATION");
   JSONObject programJson = new JSONObject();
@@ -10,8 +13,7 @@ String compile(ArrayList<Node> nodes, ArrayList<Link> links) {
   }
   programJson.setJSONObject("io", getIntrinsicAssignments(nodes, allocations));
   programJson.setJSONArray("nodes", nodesJson);
-  println(programJson.toString());
-  return null;
+  return programJson;
 }
 
 JSONObject getIntrinsicAssignments(ArrayList<Node> nodes, HashMap<Port, Integer> allocations) {
@@ -66,6 +68,8 @@ HashMap<Port, Integer> allocateLinks(ArrayList<Link> links) {
   }
   return allocations;
 }
+
+// LOADING:
 
 class Program {
   public ArrayList<Node> nodes;
