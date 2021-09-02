@@ -2,6 +2,7 @@ pub mod adsr;
 pub mod mixer;
 pub mod serialized;
 pub mod sinosc;
+pub mod voice;
 
 use std::sync::mpsc::Receiver;
 
@@ -79,7 +80,6 @@ impl Patch {
     pub fn set_gate(&mut self, gate: bool) {
         if let Some(i) = self.io.gate {
             self.state.links[i] = if gate { 1.0 } else { 0.0 };
-            println!("new gate {}", self.state.links[i]);
         }
     }
 }

@@ -44,6 +44,7 @@ pub enum OutPort {
 }
 
 impl InPort {
+    #[inline]
     pub fn read(&self, state: &SynthState) -> f64 {
         match *self {
             Self::Link(i) => state.links[i],
@@ -59,6 +60,7 @@ impl Default for InPort {
 }
 
 impl OutPort {
+    #[inline]
     pub fn write(&self, val: f64, state: &mut SynthState) {
         if let OutPort::Link(i) = *self {
             state.links[i] = val
