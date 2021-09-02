@@ -100,7 +100,7 @@ impl DspNode for Adsr {
             s
         } else if self.releasing {
             // !gate && releasing
-            let release = s - ((t - self.gate_end) / r * s);
+            let release = s - ((state.t - self.gate_end) / r * s);
             if release <= 0.0 {
                 self.releasing = false;
             }

@@ -71,26 +71,3 @@ impl Default for OutPort {
         Self::Unused
     }
 }
-
-impl From<PatchDefinition> for Patch {
-    fn from(def: PatchDefinition) -> Self {
-        // map enum into trait object
-        let dyn_nodes: Vec<Box<dyn DspNode>> = def
-            .nodes
-            .into_iter()
-            .map(|x| -> Box<dyn DspNode> {
-                match x {
-                    DspNodeEnum::Adsr(x) => Box::new(x) as _,
-                    DspNodeEnum::SinOsc(x) => Box::new(x) as _,
-                    DspNodeEnum::Mixer(x) => Box::new(x) as _,
-                }
-            })
-            .collect();
-        Patch {
-            state: SynthState::new(100),
-            nodes: dyn_nodes,
-            io: def.io,
-            sample_rate: 44100,
-        }
-    }
-}

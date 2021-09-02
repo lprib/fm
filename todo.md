@@ -3,7 +3,7 @@
 ## Synth engine
 - [ ] Investigate frequency modulation increasing in effect over time
 - [ ] Topological sort
-- [ ] MIDI input
+- [x] MIDI input
 - [ ] Unison span input and unison support
 - [ ] MIDI mod wheel input?
 - [ ] Detect long runs of DspNode that do not depend on anything else and run in parallel
