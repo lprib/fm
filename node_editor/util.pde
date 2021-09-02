@@ -18,7 +18,7 @@ void drawBez(Location s, Location e) {
       s = e;
       e = temp;
     }
-    float controlInset = (e.x - s.x) / 1.5;
+    float controlInset = min((e.x - s.x) / 1.2, 100);
     float control1x = s.x + controlInset;
     float control2x = e.x - controlInset;
     noFill();

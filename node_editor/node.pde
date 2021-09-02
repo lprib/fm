@@ -127,8 +127,7 @@ class Node {
   // returns a Port if xy is within a port's selection area, else null
   public Port portNearPoint(float x, float y) {
     for(Port p: ports) {
-      Location l = p.getAbsoluteLocation();
-      if(dist(x, y, l.x, l.y) <= p.ellipseSize) {
+      if(p.isPointInside(x, y)) {
         return p;
       }
     }

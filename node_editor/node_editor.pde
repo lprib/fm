@@ -1,7 +1,11 @@
 import javax.swing.JOptionPane;
 
+// text size
+float myTextSize = 14;
+
 ArrayList<Node> nodes = new ArrayList<Node>();
 ArrayList<Link> links = new ArrayList<Link>();
+NotificationQueue notifyQueue = new NotificationQueue();
 
 String currentFilename = "";
 
@@ -14,9 +18,6 @@ Port highlightedPort = null;
 // If a link has been started, this will be non-null.
 Port linkStartedPort = null;
 
-// text size
-float myTextSize = 14;
-
 // color of text, outlines, etc.
 color bgColor = #102027;
 color uiColor = #e0e0e0;
@@ -24,7 +25,7 @@ color outlineColor = #62727b;
 color linkColor = color(144, 164, 174, 150);
 color nodeFillColor = #37474f;
 color intrinsicNodeFillColor = #424242;
-color highlightColor = color(64, 126, 176);
+color notifyBg = #7f0000;
 
 void setup() {
   size(1400, 800);
@@ -35,15 +36,7 @@ void setup() {
 void draw() {
   background(bgColor);
 
-  // Check if the cursor is over a node
-  highlightedNode = null;
-  for(Node n: nodes) {
-    if(n.isPointInside(mouseX, mouseY)) {
-      highlightedNode = n;
-    }
-  }
-
-  // check if the cursor is over a port
+  highlightedNode = getHighlightedNode();
   highlightedPort = getHighlightedPort();
 
   // draw nodes
@@ -62,55 +55,45 @@ void draw() {
   if(linkStartedPort != null) {
     drawBez(linkStartedPort.getAbsoluteLocation(), new Location(mouseX, mouseY));
   }
+
+  notifyQueue.draw();
 }
 
+Node getHighlightedNode() {
+  Node ret = null;
+  for(Node n: nodes) {
+    if(n.isPointInside(mouseX, mouseY)) {
+      // instead of returning immediately, return the last element of nodes
+      // that meets highlight criteria. This is because nodes are drawn in
+      // order, so this will return the 'topmost' node that the cursor is over.
+      ret = n;
+    }
+  }
+  return ret;
+}
 
 Port getHighlightedPort() {
+  Port ret = null;
   for(Node n: nodes) {
     Port check = n.portNearPoint(mouseX, mouseY);
     if(check != null) {
-      return check;
+      ret = check;
     }
   }
-  return null;
+  return ret;
 }
 
 void keyPressed() {
   // highlighted actions:
   switch(key) {
     case ' ':
-      // move highlighted node
+      // snap or unsnap highlightedNode to the mouse
       if(highlightedNode != null && !highlightedNode.desc.intrinsic) {
         highlightedNode.mouse_snapped = !highlightedNode.mouse_snapped;
       }
       break;
     case 'x':
-      // delete links to highlighted port if selected, otherwise delete highlighted node
-      if(highlightedPort != null) {
-        ArrayList<Link> toRemove = new ArrayList<Link>();
-        for(Link l: links) {
-          if(l.inputPort.equals(highlightedPort) || l.outputPort.equals(highlightedPort)) {
-            toRemove.add(l);
-            l.notifyUnlink();
-          }
-        }
-        links.removeAll(toRemove);
-      } else if(highlightedNode != null && !highlightedNode.desc.intrinsic) {
-        // Remove all links that connect to this node
-        ArrayList<Link> toRemove = new ArrayList<Link>();
-        for(Link l: links) {
-          if(
-            l.inputPort.parent == highlightedNode ||
-            l.outputPort.parent == highlightedNode
-          ) {
-            toRemove.add(l);
-            l.notifyUnlink();
-          }
-        }
-        links.removeAll(toRemove);
-        nodes.remove(highlightedNode);
-        highlightedNode = null;
-      }
+      deleteNodeOrLink();
       break;
     case 's':
       // create sin oscillator
@@ -122,44 +105,12 @@ void keyPressed() {
       break;
     case 'm':
       createNode("mixer");
+      break;
     case 'c':
-      // connect link
-      if(linkStartedPort == null) {
-        // start a new link if cursor is highlighting a port
-        if(highlightedPort != null) {
-          linkStartedPort = highlightedPort;
-        }
-      } else {
-        // finish a link if cursor is highlighting a port
-        if(highlightedPort != null) {
-          boolean success = createLink(linkStartedPort, highlightedPort);
-          if(!success) {
-            println("failed to create link");
-          } else {
-            println("created link");
-          }
-        }
-        linkStartedPort = null;
-      }
+      connectOrCreateLink();
       break;
     case 'e':
-      // edit port value
-      if(highlightedPort != null) {
-        String input = JOptionPane.showInputDialog(frame, "Enter Value");
-        if(input != null) {
-          try {
-            float value = Float.parseFloat(input);
-            highlightedPort.value = value;
-          } catch(Exception e) {
-            // ignore
-            println("invalid input: " + input);
-          }
-        }
-      } else if(highlightedNode != null && !highlightedNode.desc.intrinsic) {
-        // edit node auxillary name
-        String newName = JOptionPane.showInputDialog(frame, "Enter name");
-        highlightedNode.auxName = newName;
-      }
+      editPortValueOrNodeName();
       break;
     case 'E':
       // edit node color
@@ -168,18 +119,10 @@ void keyPressed() {
       }
       break;
     case 'p':
-      String saveFilename = JOptionPane.showInputDialog(frame, "Filename", currentFilename);
-      currentFilename = saveFilename;
-      JSONObject compiled = compile(nodes, links);
-      // TODO input validation
-      saveJSONObject(compiled, saveFilename, "indent=4");
+      savePatch();
       break;
     case 'l':
-      String loadFilename = JOptionPane.showInputDialog(frame, "Filename", currentFilename);
-      currentFilename = loadFilename;
-      Program p = loadProgram(loadJSONObject(loadFilename));
-      nodes = p.nodes;
-      links = p.links;
+      loadPatch();
       break;
   }
 }
@@ -193,8 +136,53 @@ void createNode(String type) {
   nodes.add(newNode);
 }
 
+void deleteNodeOrLink() {
+  // delete links to highlighted port if selected, otherwise delete highlighted node
+  if(highlightedPort != null) {
+    ArrayList<Link> toRemove = new ArrayList<Link>();
+    for(Link l: links) {
+      if(l.inputPort.equals(highlightedPort) || l.outputPort.equals(highlightedPort)) {
+        toRemove.add(l);
+        l.notifyUnlink();
+      }
+    }
+    links.removeAll(toRemove);
+  } else if(highlightedNode != null && !highlightedNode.desc.intrinsic) {
+    // Remove all links that connect to this node
+    ArrayList<Link> toRemove = new ArrayList<Link>();
+    for(Link l: links) {
+      if(
+        l.inputPort.parent == highlightedNode ||
+        l.outputPort.parent == highlightedNode
+      ) {
+        toRemove.add(l);
+        l.notifyUnlink();
+      }
+    }
+    links.removeAll(toRemove);
+    nodes.remove(highlightedNode);
+    highlightedNode = null;
+  }
+}
+
+void connectOrCreateLink() {
+  // connect link
+  if(linkStartedPort == null) {
+    // start a new link if cursor is highlighting a port
+    if(highlightedPort != null) {
+      linkStartedPort = highlightedPort;
+    }
+  } else {
+    // finish a link if cursor is highlighting a port
+    if(highlightedPort != null) {
+      createLink(linkStartedPort, highlightedPort);
+    }
+    linkStartedPort = null;
+  }
+}
+
 // returns whether link creation was successful
-boolean createLink(Port start, Port end) {
+void createLink(Port start, Port end) {
   if(
     // Node cannot link to itsself
     (start.parent != end.parent) &&
@@ -207,8 +195,8 @@ boolean createLink(Port start, Port end) {
     Link l = new Link(output, input);
     for(Link other: links) {
       if(other.outputPort == output && other.inputPort == input){
-        println("Attempt to create duplicate link");
-        return false;
+        notifyQueue.notify("Attempt to create duplicate link");
+        return;
       }
     }
 
@@ -226,7 +214,45 @@ boolean createLink(Port start, Port end) {
     linkStartedPort = null;
     l.notifyLink();
     links.add(l);
-    return true;
+  } else {
+    notifyQueue.notify("Invalid link");
   }
-  return false;
+}
+
+void editPortValueOrNodeName() {
+  // edit port value
+  if(highlightedPort != null) {
+    String input = JOptionPane.showInputDialog(frame, "Enter Value");
+    if(input != null) {
+      try {
+        float value = Float.parseFloat(input);
+        highlightedPort.value = value;
+      } catch(Exception e) {
+        // ignore
+        notifyQueue.notify("invalid input: " + input);
+      }
+    }
+  } else if(highlightedNode != null && !highlightedNode.desc.intrinsic) {
+    // edit node auxillary name
+    String newName = JOptionPane.showInputDialog(frame, "Enter name");
+    highlightedNode.auxName = newName;
+  }
+}
+
+void savePatch() {
+  String saveFilename = JOptionPane.showInputDialog(frame, "Filename", currentFilename);
+  currentFilename = saveFilename;
+  JSONObject compiled = compile(nodes, links);
+  // TODO input validation
+  saveJSONObject(compiled, saveFilename, "indent=4");
+  notifyQueue.notify("saved " + saveFilename);
+}
+
+void loadPatch() {
+  String loadFilename = JOptionPane.showInputDialog(frame, "Filename", currentFilename);
+  currentFilename = loadFilename;
+  Program p = loadProgram(loadJSONObject(loadFilename));
+  nodes = p.nodes;
+  links = p.links;
+  notifyQueue.notify("loaded " + loadFilename);
 }

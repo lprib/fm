@@ -32,6 +32,12 @@ class Port {
     return new Location(parent.x + x, parent.y + y);
   }
 
+  public boolean isPointInside(float x, float y) {
+    Location l = getAbsoluteLocation();
+    return dist(l.x, l.y, x, y) <= ellipseSize / 2;
+  }
+
+
   // When this is called, the coordinate system must already be translated to
   // be relative to parent's location
   public void draw(boolean highlighted) {

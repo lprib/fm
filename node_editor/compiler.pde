@@ -3,7 +3,6 @@
 
 JSONObject compile(ArrayList<Node> nodes, ArrayList<Link> links) {
   HashMap<Port, Integer> allocations = allocateLinks(links);
-  println("COMPILATION");
   JSONObject programJson = new JSONObject();
   JSONArray nodesJson = new JSONArray();
   for(Node n: nodes) {
