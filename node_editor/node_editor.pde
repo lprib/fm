@@ -20,7 +20,8 @@ Port linkStartedPort = null;
 
 // color of text, outlines, etc.
 color bgColor = #102027;
-color uiColor = #e0e0e0;
+color nodeTitleColor = #ffffff;
+color uiColor = #bdbaac;
 color outlineColor = #62727b;
 color linkColor = color(144, 164, 174, 150);
 color nodeFillColor = #37474f;

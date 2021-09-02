@@ -91,6 +91,7 @@ class Node {
   public NodeDescription desc;
   // auxillary name: user defined for organization
   public String auxName;
+  public float titleTextSize = myTextSize + 2;
   public color mainColor;
   public color tint;
   float x, y = 0;
@@ -98,9 +99,9 @@ class Node {
   float h;
 
   // y location from top of node to the title underline
-  float titleUnderlineYOffset = myTextSize + 5;
+  float titleUnderlineYOffset = 2 * myTextSize + 10;
   // y location from top of node to the center of the first port
-  float portsYOffset = myTextSize + 20;
+  float portsYOffset = 2 * myTextSize + 25;
   // y spacing between each port
   float portSpacing = 15;
 
@@ -108,7 +109,7 @@ class Node {
     int numRows = max(desc.inputs.length, desc.outputs.length);
     this.h = portsYOffset + numRows * portSpacing;
     this.desc = desc;
-    this.auxName = desc.name;
+    this.auxName = "";
     this.mainColor = desc.intrinsic ? intrinsicNodeFillColor : nodeFillColor;
     // default to no tint (ie. tint same as main color)
     this.tint = mainColor;
@@ -167,8 +168,10 @@ class Node {
     line(0, titleUnderlineYOffset, w, titleUnderlineYOffset);
 
     textAlign(CENTER, TOP);
+    fill(nodeTitleColor);
+    text(auxName, w/2, 0);
     fill(uiColor);
-    text(auxName + ": " + desc.name, w/2, 0);
+    text(desc.name, w/2, titleTextSize + 2);
 
     for(Port p: ports) {
       p.draw(highlightedPort == p);
