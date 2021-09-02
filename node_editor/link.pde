@@ -12,6 +12,7 @@ class Link {
 
   public void draw() {
     stroke(linkColor);
+    strokeWeight(3);
     drawBez(outputPort.getAbsoluteLocation(), inputPort.getAbsoluteLocation());
   }
 

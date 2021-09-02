@@ -9,8 +9,9 @@
 - [ ] Support for attenuation on port inputs
 
 ## Node editor
-- [ ] allow metadata tags for nodes (color, custom name, etc.)
+- [x] allow metadata tags for nodes (color, custom name, etc.)
+- [ ] Generic node metadata, rather than hardcoded types
 - [ ] crashed on file not found
 - [ ] set working directory, patch browser?
-- [ ] default value for node ports on initialization of node
+- [x] default value for node ports on initialization of node
 - [ ] separate compilation into transformation from (Node, Link) to (Node) and JSON serializing (2 steps)

@@ -1,3 +1,6 @@
+import javax.swing.JColorChooser;
+import java.awt.Color;
+
 class Location {
   public float x;
   public float y;
@@ -33,7 +36,16 @@ void initScene(ArrayList<Node> nodes) {
     } else {
       n.x = width - n.w - 10;
     }
-    n.y = i*80;
+    n.y = i*80 + 20;
     nodes.add(n);
+  }
+}
+
+color chooseColor(color defaultValue) {
+  Color awtColor = JColorChooser.showDialog(frame, "Node Color", Color.white);
+  if(awtColor != null) {
+    return color(awtColor.getRed(), awtColor.getGreen(), awtColor.getBlue());
+  } else {
+    return defaultValue;
   }
 }

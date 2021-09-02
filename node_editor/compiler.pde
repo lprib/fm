@@ -8,7 +8,7 @@ JSONObject compile(ArrayList<Node> nodes, ArrayList<Link> links) {
   JSONArray nodesJson = new JSONArray();
   for(Node n: nodes) {
     if(!n.desc.intrinsic) {
-      nodesJson.append(getNodeObject(n, allocations));
+      nodesJson.append(serializeNode(n, allocations));
     }
   }
   programJson.setJSONObject("io", getIntrinsicAssignments(nodes, allocations));
@@ -30,11 +30,13 @@ JSONObject getIntrinsicAssignments(ArrayList<Node> nodes, HashMap<Port, Integer>
   return assignments;
 }
 
-JSONObject getNodeObject(Node n, HashMap<Port, Integer> allocations) {
+JSONObject serializeNode(Node n, HashMap<Port, Integer> allocations) {
   JSONObject nodeJson = new JSONObject();
   nodeJson.setString("type", n.desc.name);
   nodeJson.setFloat("_x", n.x);
   nodeJson.setFloat("_y", n.y);
+  nodeJson.setString("_name", n.auxName);
+  nodeJson.setString("_color", hex(n.tint));
   for(Port p: n.ports) {
     JSONObject portJson = new JSONObject();
     Integer alloc = allocations.get(p);
@@ -55,6 +57,9 @@ JSONObject getNodeObject(Node n, HashMap<Port, Integer> allocations) {
   return nodeJson;
 }
 
+// Assign links to be pointers into a "link allocation registry"
+// Eg. If port A links to B and C, set A, B, C to all map to the same integer
+// in the output hashmap
 HashMap<Port, Integer> allocateLinks(ArrayList<Link> links) {
   HashMap<Port, Integer> allocations = new HashMap<Port, Integer>();
   ArrayList<Port> portAlloc = new ArrayList<Port>();
@@ -136,6 +141,14 @@ Node nodeFromJson(JSONObject json, HashMap<Integer, LinkDef> linkDefs) {
   Node n = new Node(nodeTypes.get(type));
   n.x = json.getFloat("_x");
   n.y = json.getFloat("_y");
+  String auxName = json.getString("_name"); 
+  if(auxName != null) {
+    n.auxName = auxName;
+  }
+  String tintColor = json.getString("_color");
+  if(tintColor != null) {
+    n.tint = unhex(tintColor);
+  }
   for(String portName: n.desc.inputs) {
     linkPort(n, portName, json, linkDefs);
   }

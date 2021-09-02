@@ -9,15 +9,17 @@ class Port {
 
   public int numLinks = 0;
   // value is only applicable if this port is an input port
-  public float value = 0.0;
+  public float value;
 
   // drawing constants
   public final float ellipseSize = 15;
-  public final float linkEllipseSize = 7;
-  public final float nodeTextInset = 8;
+  public final float linkEllipseSize = 9;
+  public final float nodeTextInset = 10;
+  public final float selectedPortTextInset = 20;
 
-  public Port(Node parent, int index, boolean isInput, String name) {
+  public Port(Node parent, float initValue, int index, boolean isInput, String name) {
     this.parent = parent;
+    this.value = initValue;
     // Place on left if input, else right
     this.x = (isInput ? 0 : parent.w);
     this.y = parent.portsYOffset + index * parent.portSpacing;
@@ -33,17 +35,15 @@ class Port {
   // When this is called, the coordinate system must already be translated to
   // be relative to parent's location
   public void draw(boolean highlighted) {
-    stroke(uiColor);
-    if(highlighted) {
-      fill(highlightColor);
-    } else {
-      fill(nodeFillColor);
-    }
+    stroke(outlineColor);
+    fill(parent.mainColor);
 
     ellipseMode(CENTER);
     ellipse(x, y, ellipseSize, ellipseSize);
-
-
+    if(highlighted) {
+      fill(255, 20);
+      ellipse(x, y, ellipseSize, ellipseSize);
+    }
 
     if(numLinks > 0) {
       fill(linkColor);
@@ -53,9 +53,10 @@ class Port {
 
     stroke(uiColor);
     fill(uiColor);
+    float inset = highlighted ? selectedPortTextInset : nodeTextInset;
     if(isInput) {
       textAlign(LEFT, CENTER);
-      text(name, x + nodeTextInset, y);
+      text(name, x + inset, y);
       // Draw const value if there are no links to this port
       if(numLinks == 0) {
         textAlign(RIGHT, CENTER);
@@ -63,7 +64,7 @@ class Port {
       }
     } else {
       textAlign(RIGHT, CENTER);
-      text(name, x - nodeTextInset, y);
+      text(name, x - inset, y);
     }
   }
 

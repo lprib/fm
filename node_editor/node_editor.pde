@@ -15,23 +15,25 @@ Port highlightedPort = null;
 Port linkStartedPort = null;
 
 // text size
-float myTextSize = 12;
+float myTextSize = 14;
 
 // color of text, outlines, etc.
-color uiColor = color(0, 0, 0);
-color linkColor = color(0, 100, 200);
-color nodeFillColor = color(200, 200, 255);
-color intrinsicNodeFillColor = color(210, 250, 255);
-color highlightColor = color(230, 230, 255);
+color bgColor = #102027;
+color uiColor = #e0e0e0;
+color outlineColor = #62727b;
+color linkColor = color(144, 164, 174, 150);
+color nodeFillColor = #37474f;
+color intrinsicNodeFillColor = #424242;
+color highlightColor = color(64, 126, 176);
 
 void setup() {
-  size(1200, 600);
+  size(1400, 800);
   textSize(myTextSize);
   initScene(nodes);
 }
 
 void draw() {
-  background(255);
+  background(bgColor);
 
   // Check if the cursor is over a node
   highlightedNode = null;
@@ -56,6 +58,7 @@ void draw() {
   
   // draw in-progress links
   stroke(linkColor);
+  strokeWeight(2);
   if(linkStartedPort != null) {
     drawBez(linkStartedPort.getAbsoluteLocation(), new Location(mouseX, mouseY));
   }
@@ -140,7 +143,7 @@ void keyPressed() {
       }
       break;
     case 'e':
-      // edit node value
+      // edit port value
       if(highlightedPort != null) {
         String input = JOptionPane.showInputDialog(frame, "Enter Value");
         if(input != null) {
@@ -152,12 +155,23 @@ void keyPressed() {
             println("invalid input: " + input);
           }
         }
+      } else if(highlightedNode != null && !highlightedNode.desc.intrinsic) {
+        // edit node auxillary name
+        String newName = JOptionPane.showInputDialog(frame, "Enter name");
+        highlightedNode.auxName = newName;
+      }
+      break;
+    case 'E':
+      // edit node color
+      if(highlightedNode != null && !highlightedNode.desc.intrinsic) {
+        highlightedNode.tint = chooseColor(nodeFillColor);
       }
       break;
     case 'p':
       String saveFilename = JOptionPane.showInputDialog(frame, "Filename", currentFilename);
       currentFilename = saveFilename;
       JSONObject compiled = compile(nodes, links);
+      // TODO input validation
       saveJSONObject(compiled, saveFilename, "indent=4");
       break;
     case 'l':
