@@ -1,4 +1,4 @@
-use super::{adsr::Adsr, mixer::Mixer, sinosc::SinOsc, DspNode, Patch, SynthState};
+use super::{adsr::Adsr, mixer::Mixer, sinosc::SinOsc, ProgramState};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
@@ -16,7 +16,7 @@ pub enum DspNodeEnum {
     Mixer(Mixer),
 }
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Clone)]
 #[serde(default)]
 pub struct IO {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -29,14 +29,14 @@ pub struct IO {
     pub rchan: Option<usize>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum InPort {
     Link(usize),
     Const(f64),
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum OutPort {
     Link(usize),
@@ -45,7 +45,7 @@ pub enum OutPort {
 
 impl InPort {
     #[inline]
-    pub fn read(&self, state: &SynthState) -> f64 {
+    pub fn read(&self, state: &ProgramState) -> f64 {
         match *self {
             Self::Link(i) => state.links[i],
             Self::Const(n) => n,
@@ -61,7 +61,7 @@ impl Default for InPort {
 
 impl OutPort {
     #[inline]
-    pub fn write(&self, val: f64, state: &mut SynthState) {
+    pub fn write(&self, val: f64, state: &mut ProgramState) {
         if let OutPort::Link(i) = *self {
             state.links[i] = val
         }

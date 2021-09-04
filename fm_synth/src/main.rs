@@ -5,7 +5,7 @@ use std::{fs, sync::mpsc::channel};
 
 use crate::synth::{serialized::PatchDefinition, Patch};
 use midi::{get_midi_input, parse_midi};
-use rodio::{buffer::SamplesBuffer, OutputStream, Sink};
+use rodio::{OutputStream, Sink};
 
 fn main() {
     let (tx, rx) = channel();

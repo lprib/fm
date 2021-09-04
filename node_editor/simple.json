@@ -1,0 +1,20 @@
+{
+    "nodes": [{
+        "phase": {"const": 0},
+        "feedback": {"const": 0},
+        "vol": {"link": 2},
+        "mult": {"const": 1},
+        "_name": "",
+        "_color": "FF37474F",
+        "freq": {"link": 0},
+        "_x": 657.5,
+        "_y": 175,
+        "type": "sinosc",
+        "out": {"link": 1}
+    }],
+    "io": {
+        "freq": 0,
+        "gate": 2,
+        "lchan": 1
+    }
+}

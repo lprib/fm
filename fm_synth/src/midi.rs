@@ -48,10 +48,11 @@ pub fn get_midi_input() -> Result<(MidiInput, MidiInputPort), String> {
 pub fn parse_midi(bytes: &[u8]) -> Option<SynthInputEvent> {
     if (bytes[0] & 0xF0) == 0x90 {
         Some(SynthInputEvent::KeyDown {
+            key: bytes[1],
             freq: key_to_freq(bytes[1]),
         })
     } else if (bytes[0] & 0xF0) == 0x80 {
-        Some(SynthInputEvent::KeyUp)
+        Some(SynthInputEvent::KeyUp { key: bytes[1] })
     } else {
         None
     }

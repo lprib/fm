@@ -1,10 +1,10 @@
 use super::{
     serialized::{InPort, OutPort},
-    DspNode, SynthState,
+    DspNode, ProgramState,
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
 pub struct Mixer {
     pub in1: InPort,
@@ -17,7 +17,7 @@ pub struct Mixer {
     pub out: OutPort,
 }
 impl DspNode for Mixer {
-    fn next_sample(&mut self, state: &mut SynthState) {
+    fn next_sample(&mut self, state: &mut ProgramState) {
         let in1 = self.in1.read(state);
         let in2 = self.in2.read(state);
         let in3 = self.in3.read(state);

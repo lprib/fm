@@ -4,90 +4,72 @@ pub mod serialized;
 pub mod sinosc;
 pub mod voice;
 
-use std::sync::mpsc::Receiver;
+use std::{
+    iter::{repeat, repeat_with},
+    sync::mpsc::Receiver,
+};
 
-use self::serialized::{DspNodeEnum, PatchDefinition, IO};
+use self::{serialized::PatchDefinition, voice::Program};
 use rodio::Source;
 
 pub trait DspNode {
-    fn next_sample(&mut self, state: &mut SynthState);
+    fn next_sample(&mut self, state: &mut ProgramState);
 }
 
-pub struct Patch {
-    state: SynthState,
-    nodes: Vec<Box<dyn DspNode + Send>>,
-    io: IO,
-    sample_rate: u32,
-    event_rx: Receiver<SynthInputEvent>,
-    pending_sample: Option<f64>,
-}
-
-pub struct SynthState {
+pub struct ProgramState {
     links: Vec<f64>,
     t: f64,
 }
 
-impl SynthState {
-    pub fn new(num_links: usize) -> Self {
-        SynthState {
-            links: vec![0.0; num_links],
-            t: 0.0,
-        }
-    }
-}
-impl Patch {
-    pub fn new(def: PatchDefinition, event_rx: Receiver<SynthInputEvent>) -> Self {
-        // map enum into trait object
-        let dyn_nodes: Vec<Box<dyn DspNode + Send>> = def
-            .nodes
-            .into_iter()
-            .map(|x| -> Box<dyn DspNode + Send> {
-                match x {
-                    DspNodeEnum::Adsr(x) => Box::new(x) as _,
-                    DspNodeEnum::SinOsc(x) => Box::new(x) as _,
-                    DspNodeEnum::Mixer(x) => Box::new(x) as _,
-                }
-            })
-            .collect();
-        Patch {
-            state: SynthState::new(100),
-            nodes: dyn_nodes,
-            io: def.io,
-            sample_rate: 44100,
-            event_rx,
-            pending_sample: None,
-        }
-    }
-
-    pub fn next_sample(&mut self) -> (f64, f64) {
-        for node in &mut self.nodes {
-            node.next_sample(&mut self.state);
-        }
-        self.state.t += 1.0 / self.sample_rate as f64;
-
-        (
-            self.io.lchan.map(|i| self.state.links[i]).unwrap_or(0.0),
-            self.io.rchan.map(|i| self.state.links[i]).unwrap_or(0.0),
-        )
-    }
-
-    pub fn set_freq(&mut self, freq: f64) {
-        if let Some(i) = self.io.freq {
-            self.state.links[i] = freq;
-        }
-    }
-
-    pub fn set_gate(&mut self, gate: bool) {
-        if let Some(i) = self.io.gate {
-            self.state.links[i] = if gate { 1.0 } else { 0.0 };
-        }
-    }
-}
-
 #[derive(Debug)]
 pub enum SynthInputEvent {
-    KeyDown { freq: f64 },
-    KeyUp,
+    KeyDown { key: u8, freq: f64 },
+    KeyUp { key: u8 },
+}
+
+pub struct Patch {
+    voices: Vec<Program>,
+    voice_assignments: Vec<Option<u8>>,
+    event_rx: Receiver<SynthInputEvent>,
+    sample_rate: u32,
+}
+
+impl Patch {
+    pub fn new(def: PatchDefinition, event_rx: Receiver<SynthInputEvent>) -> Self {
+        let num_voices = 8;
+        Self {
+            voices: repeat_with(|| Program::new(&def))
+                .take(num_voices)
+                .collect(),
+            voice_assignments: repeat(None).take(num_voices).collect(),
+            event_rx,
+            sample_rate: 44100,
+        }
+    }
+
+    pub fn handle_event(&mut self, event: SynthInputEvent) {
+        match event {
+            SynthInputEvent::KeyDown { key, .. } => {
+                let unused_voice_idx = self.voice_assignments.iter().position(|k| *k == None);
+                if let Some(unused_voice_idx) = unused_voice_idx {
+                    self.voices[unused_voice_idx].process_event(event);
+                    self.voice_assignments[unused_voice_idx] = Some(key);
+                    println!("allocating voice {}", unused_voice_idx);
+                }
+            }
+            SynthInputEvent::KeyUp { key } => {
+                // TODO use least-recently used algorithm here so new voices dont clobber the
+                // release of current voices
+                // alternatively, let voices signal when theyre "done"
+                let voice_idx = self.voice_assignments.iter().position(|k| *k == Some(key));
+                if let Some(voice_idx) = voice_idx {
+                    self.voices[voice_idx].process_event(event);
+                    self.voice_assignments[voice_idx] = None;
+                    println!("releasing voice {}", voice_idx);
+                }
+            }
+        }
+    }
 }
 
 impl Iterator for Patch {
@@ -96,27 +78,11 @@ impl Iterator for Patch {
     fn next(&mut self) -> Option<Self::Item> {
         // get all events in the queue
         while let Ok(event) = self.event_rx.try_recv() {
-            match event {
-                SynthInputEvent::KeyDown { freq } => {
-                    self.set_freq(freq);
-                    self.set_gate(true);
-                }
-                SynthInputEvent::KeyUp => {
-                    self.set_gate(false);
-                }
-            };
+            self.handle_event(event);
         }
-
-        // Perform interlacing
-        if let Some(samp) = self.pending_sample {
-            self.pending_sample = None;
-            Some(samp as f32)
-        } else {
-            // No pending sample, so generate
-            let (l, r) = self.next_sample();
-            self.pending_sample = Some(r);
-            Some(l as f32)
-        }
+        Some(
+            self.voices.iter_mut().filter_map(|v| v.next()).sum::<f32>() / self.voices.len() as f32,
+        )
     }
 }
 

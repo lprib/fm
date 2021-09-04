@@ -1,12 +1,12 @@
 # TODO
 
 ## Synth engine
-- [ ] Polyphony
-    - Threading per voice
-    - Voices need to know when they start and stop producing sounds (ie. a
+- [x] Polyphony
+    - [ ] Threading per voice
+    - [ ] Voices need to know when they start and stop producing sounds (ie. a
       'master' ADSR that tracks gate and release). Should be configurable per
       unison program, so that when the last unison finishes, the thread sleeps.
-    - When a voice is not active, the thread sleeps
+    - [ ] When a voice is not active, the thread sleeps
 - [ ] Unison span input and unison support
     - Add a pan left/right node to easily spread unison voices around the stereo field
 - [ ] State based ADSR, ie. state = {Attacking, decaying, sustaining,
@@ -22,7 +22,8 @@
 - [ ] Support for attenuation and DC offset on all port inputs and outputs
   (reuse `const` param)
 - [ ] More useful node types
-    - Fade mixer
+    - Fade between 2 inputs mixer
+    - Auto DC bias mixer (ie +-1 to (0->1))
     - log to linear converter
     - square/saw oscillator, or consolidate into a single oscillator type
     - Filters?
@@ -45,6 +46,7 @@
 - [x] allow metadata tags for nodes (color, custom name, etc.)
 - [ ] Generic node metadata, rather than hardcoded types
 - [ ] crashed on file not found
+- [ ] crashes on 'cancel' for color and node name
 - [ ] set working directory, patch browser?
 - [x] default value for node ports on initialization of node
 - [ ] separate compilation into transformation from (Node, Link) to (Node) and JSON serializing (2 steps)

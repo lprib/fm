@@ -1,10 +1,10 @@
 use super::{
     serialized::{InPort, OutPort},
-    DspNode, SynthState,
+    DspNode, ProgramState,
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
 pub struct Adsr {
     pub gate: InPort,
@@ -47,18 +47,6 @@ impl Default for Adsr {
 }
 
 impl Adsr {
-    pub fn new(gate: InPort, a: InPort, d: InPort, s: InPort, r: InPort, out: OutPort) -> Self {
-        Adsr {
-            gate,
-            a,
-            d,
-            s,
-            r,
-            out,
-            ..Default::default()
-        }
-    }
-
     // Returns whether a given gate value is considered 'on' and should trigger the ADSR.
     fn gate_on(gate: f64) -> bool {
         gate != 0.0
@@ -66,7 +54,7 @@ impl Adsr {
 }
 
 impl DspNode for Adsr {
-    fn next_sample(&mut self, state: &mut SynthState) {
+    fn next_sample(&mut self, state: &mut ProgramState) {
         let gate = Self::gate_on(self.gate.read(state));
 
         // Set up gate start and end markers on rising/falling edges of gate.

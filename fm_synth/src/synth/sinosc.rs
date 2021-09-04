@@ -1,11 +1,11 @@
 use super::{
     serialized::{InPort, OutPort},
-    DspNode, SynthState,
+    DspNode, ProgramState,
 };
 use serde::{Deserialize, Serialize};
 use std::f64::consts::PI;
 
-#[derive(Serialize, Deserialize, Default)]
+#[derive(Serialize, Deserialize, Default, Clone)]
 #[serde(rename_all = "lowercase")]
 pub struct SinOsc {
     pub freq: InPort,
@@ -17,29 +17,8 @@ pub struct SinOsc {
     pub out: OutPort,
 }
 
-impl SinOsc {
-    pub fn new(
-        freq: InPort,
-        phase: InPort,
-        vol: InPort,
-        feedback: InPort,
-        mult: InPort,
-        out: OutPort,
-    ) -> Self {
-        SinOsc {
-            freq,
-            phase,
-            vol,
-            feedback,
-            mult,
-            out,
-            ..Default::default()
-        }
-    }
-}
-
 impl DspNode for SinOsc {
-    fn next_sample(&mut self, state: &mut SynthState) {
+    fn next_sample(&mut self, state: &mut ProgramState) {
         let vol = self.vol.read(state);
         let freq = self.freq.read(state);
         let phase = self.phase.read(state);
