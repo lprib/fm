@@ -5,17 +5,18 @@ import javax.swing.JOptionPane
 import kotlin.math.max
 
 object NodeDrawOptions {
-    const val width = 125f
-    const val titleUnderlineY = 2f * DrawOptions.textSize + 10f
-    const val portStartY = 2f * DrawOptions.textSize + 25f
-    const val portSpacing = 25
-    const val tintAlpha = 40;
+    const val width = 200f
+    const val portPadding = 10f;
+    const val portSpacing = PortDrawOptions.portHeight + portPadding
+    const val titleUnderlineY = 2f * DrawOptions.textSize + 13f
+    const val portStartY = titleUnderlineY + portSpacing / 2f
+    const val tintAlpha = 40
     const val titleTextSize = DrawOptions.textSize + 2f
 }
 
-data class PortDescription(val name: String, val defaultVal: Float, val input: Boolean) {
+data class PortDescription(val name: String, val defaultBias: Float, val input: Boolean) {
     fun toPort(parent: Node, location: Vec2): Port =
-        if (input) InputPort(parent, name, location, defaultVal) else OutputPort(parent, name, location)
+        if (input) InputPort(parent, name, location, 1f, defaultBias) else OutputPort(parent, name, location)
 }
 
 enum class NodeType(
@@ -44,6 +45,18 @@ enum class NodeType(
             PortDescription("out", 0f, false),
         )
     ),
+    MIXER(
+        "mixer",
+        arrayOf(
+            PortDescription("in1", 0f, true),
+            PortDescription("in2", 0f, true),
+            PortDescription("in3", 0f, true),
+            PortDescription("mix1", 1f, true),
+            PortDescription("mix2", 1f, true),
+            PortDescription("mix3", 1f, true),
+            PortDescription("out", 0f, false),
+        )
+    ),
 
     // intrinsics
     FREQ("freq", arrayOf(PortDescription("out", 0f, false))),
@@ -65,7 +78,7 @@ open class Node(
     private val height = max(
         type.ports.filter { it.input }.size,
         type.ports.filter { !it.input }.size
-    ) * NodeDrawOptions.portSpacing + NodeDrawOptions.portStartY
+    ) * NodeDrawOptions.portSpacing + NodeDrawOptions.titleUnderlineY
 
     val ports = generatePorts(type)
 
@@ -124,10 +137,11 @@ open class Node(
 
         p.textAlign(PApplet.CENTER, PApplet.TOP)
         p.fill(DrawOptions.nodeTitleColor)
-        // TODO respect titleTextSize
+        p.textSize(NodeDrawOptions.titleTextSize)
         p.text(customName, width / 2f, 0f)
         p.fill(DrawOptions.uiColor)
-        p.text(type.nodeName, width / 2f, NodeDrawOptions.titleTextSize + 2f)
+        p.textSize(DrawOptions.textSize)
+        p.text(type.nodeName, width / 2f, NodeDrawOptions.titleTextSize + 4f)
 
         ports.forEach {
             it.draw(p)

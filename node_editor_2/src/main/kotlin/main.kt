@@ -1,17 +1,25 @@
-import processing.core.PApplet;
+import processing.core.PApplet
+import javax.swing.UIManager
 
 fun main(args: Array<String>) {
+    try {
+        UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
+    } catch (e: Exception) {
+        // ignore
+    }
     PApplet.main("Main")
 }
 
 object DrawOptions {
     val bgColor = color("#102027")
     val uiColor = color("#bdbaac")
+    val portMultTextColor = color("#bd8080")
+    val portBiasTextColor = color("#807dba")
     val highlightOverlayColor = color("#ffffff22")
     val nodeFillColor = color("#37474f")
     val nodeTitleColor = color("#ffffff")
     val linkColor = color("#90a4ae96")
-    val intrinsicTintColor = color("#ffffff")
+    val intrinsicTintColor = color("#003c96")
     const val textSize = 14f
 }
 
@@ -50,17 +58,20 @@ class Main : PApplet() {
         when (key) {
             's' -> createNode(NodeType.SINOSC)
             'a' -> createNode(NodeType.ADSR)
+            'A' -> createNode(NodeType.MIXER)
             ' ' -> {
                 if (selection != null && selection is Node) {
                     (selection as Node).mouseSnapped = !(selection as Node).mouseSnapped
                 }
             }
             'c' -> connectOrCreateLink()
-            'x' -> deleteNodeOrLink()
+            'd' -> deleteNodeOrLink()
             'e' -> when (selection) {
+                is InputPort -> (selection as InputPort).editMultValue(this)
                 is Node -> (selection as Node).editCustomName(this)
             }
             'E' -> when (selection) {
+                is InputPort -> (selection as InputPort).editBiasValue(this)
                 is Node -> (selection as Node).editTintColor(this)
             }
         }
@@ -124,7 +135,14 @@ class Main : PApplet() {
 
     private fun deleteNodeOrLink() {
         when (selection) {
-            is Port -> links.removeAll { it.inputPort == selection || it.outputPort == selection }
+            is Port -> links.removeAll {
+                if (it.inputPort == selection || it.outputPort == selection) {
+                    it.notifyDelete()
+                    true
+                } else {
+                    false
+                }
+            }
             is IntrinsicNode -> {
                 // cannot remove intrinsics
             }

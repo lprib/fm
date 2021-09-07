@@ -5,6 +5,10 @@ object LinkDrawOptions {
 }
 
 class Link(val inputPort: InputPort, val outputPort: OutputPort) : Drawable {
+    init {
+        inputPort.hasConnectedLink = true
+    }
+
     override fun draw(p: PApplet) {
         p.stroke(DrawOptions.linkColor)
         p.strokeWeight(3f)
@@ -23,5 +27,10 @@ class Link(val inputPort: InputPort, val outputPort: OutputPort) : Drawable {
             LinkDrawOptions.ellipseSize,
             LinkDrawOptions.ellipseSize
         )
+    }
+
+    // this MUST be called before deleting link
+    fun notifyDelete() {
+        inputPort.hasConnectedLink = false
     }
 }
