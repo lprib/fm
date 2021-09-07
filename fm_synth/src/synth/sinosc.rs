@@ -5,7 +5,7 @@ use super::{
 use serde::{Deserialize, Serialize};
 use std::f64::consts::PI;
 
-#[derive(Serialize, Deserialize, Default, Clone)]
+#[derive(Serialize, Deserialize, Default, Clone, Debug)]
 #[serde(rename_all = "lowercase")]
 pub struct SinOsc {
     pub freq: InPort,

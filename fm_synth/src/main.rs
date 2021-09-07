@@ -7,7 +7,7 @@ use crate::synth::{serialized::PatchDefinition, Patch};
 use midi::{get_midi_input, parse_midi};
 use rodio::{OutputStream, Sink};
 
-fn main() {
+fn main2() {
     let (tx, rx) = channel();
 
     let patch_str =
@@ -35,4 +35,15 @@ fn main() {
     let sink = Sink::try_new(&handle).unwrap();
     sink.append(patch);
     sink.sleep_until_end();
+}
+
+fn main() {
+    ws::listen("localhost:8089", |client| {
+        println!("New connection");
+        move |msg| {
+            println!("message {}", msg);
+            Ok(())
+        }
+    })
+    .unwrap();
 }

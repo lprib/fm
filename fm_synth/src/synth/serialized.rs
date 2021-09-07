@@ -1,13 +1,13 @@
 use super::{adsr::Adsr, mixer::Mixer, sinosc::SinOsc, ProgramState};
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct PatchDefinition {
     pub nodes: Vec<DspNodeEnum>,
     pub io: IO,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "lowercase")]
 #[serde(tag = "type")]
 pub enum DspNodeEnum {
@@ -16,7 +16,7 @@ pub enum DspNodeEnum {
     Mixer(Mixer),
 }
 
-#[derive(Serialize, Deserialize, Default, Clone)]
+#[derive(Serialize, Deserialize, Default, Clone, Debug)]
 #[serde(default)]
 pub struct IO {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -29,14 +29,14 @@ pub struct IO {
     pub rchan: Option<usize>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum InPort {
     Link(usize),
     Const(f64),
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "lowercase")]
 pub enum OutPort {
     Link(usize),

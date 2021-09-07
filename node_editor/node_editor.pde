@@ -1,4 +1,5 @@
 import javax.swing.JOptionPane;
+import websockets.*;
 
 // text size
 float myTextSize = 14;
@@ -6,6 +7,8 @@ float myTextSize = 14;
 ArrayList<Node> nodes = new ArrayList<Node>();
 ArrayList<Link> links = new ArrayList<Link>();
 NotificationQueue notifyQueue = new NotificationQueue();
+
+WebsocketClient ws;
 
 String currentFilename = "";
 
@@ -32,10 +35,14 @@ void setup() {
   size(1400, 800);
   textSize(myTextSize);
   initScene(nodes);
+  //ws = new WebsocketClient(this, "ws://localhost:8089");
+  println(linkColor);
 }
 
 void draw() {
   background(bgColor);
+  fill(linkColor);
+  rect(0, 0, 20, 20);
 
   highlightedNode = getHighlightedNode();
   highlightedPort = getHighlightedPort();
@@ -121,6 +128,10 @@ void keyPressed() {
       break;
     case 'p':
       savePatch();
+      break;
+    case 'P':
+      ws.sendMessage("{\"test\": \"Test message\"}");
+      notifyQueue.notify("send ws message");
       break;
     case 'l':
       loadPatch();

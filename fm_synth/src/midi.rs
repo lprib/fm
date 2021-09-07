@@ -46,6 +46,7 @@ pub fn get_midi_input() -> Result<(MidiInput, MidiInputPort), String> {
 }
 
 pub fn parse_midi(bytes: &[u8]) -> Option<SynthInputEvent> {
+    println!("{:?}", bytes);
     if (bytes[0] & 0xF0) == 0x90 {
         Some(SynthInputEvent::KeyDown {
             key: bytes[1],

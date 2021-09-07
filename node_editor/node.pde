@@ -72,6 +72,7 @@ class NodeDescription {
 
   // If this node type is an intrinsic node, determines whether it is a signal
   // producer or consumer
+  // TODO this could be inferred from the number of inputs/outputs
   public boolean intrinsicProducer;
 
   // specialIndex can be null if none
