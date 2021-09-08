@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package serde
 
 import kotlinx.serialization.SerialName

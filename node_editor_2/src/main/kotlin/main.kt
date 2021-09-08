@@ -26,6 +26,7 @@ object DrawOptions {
     val nodeTitleColor = color("#ffffff")
     val linkColor = color("#90a4ae96")
     val intrinsicTintColor = color("#003c96")
+    val notificationColor = color("#7f0000")
     const val textSize = 14f
 }
 
@@ -37,6 +38,7 @@ class Main : PApplet() {
     private val drawables: Iterable<Drawable> get() = nodes.asIterable().plus(links.asIterable())
     private var selection: SelectableObject? = null
     private var linkStartedPort: Port? = null
+    private val notify = NotificationQueue()
 
     override fun settings() {
         size(1400, 800)
@@ -59,6 +61,7 @@ class Main : PApplet() {
             strokeWeight(3f)
             drawBezier(this, it.absoluteLocation, Vec2(mouseX.toFloat(), mouseY.toFloat()))
         }
+        notify.draw(this)
     }
 
     override fun keyPressed() {
@@ -122,11 +125,11 @@ class Main : PApplet() {
 
     private fun tryCreateLink(a: Port, b: Port) {
         if (a.parent == b.parent) {
-            println("Link cannot connect to same node")
+            notify.send(this, "Link cannot connect to same node")
             return
         }
         if (a is InputPort == b is InputPort) {
-            println("Link must connect an output to an input")
+            notify.send(this, "Link must connect an output to an input")
             return
         }
         val input: InputPort = if (a is InputPort) a else b as InputPort
@@ -134,7 +137,7 @@ class Main : PApplet() {
         val newLink = Link(input, output)
         for (l in links) {
             if (l.outputPort == output && l.inputPort == input) {
-                println("Attempt to create duplicate link")
+                notify.send(this, "Attempt to create duplicate link")
                 return
             }
         }

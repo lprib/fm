@@ -6,7 +6,7 @@ import kotlin.math.max
 
 object NodeDrawOptions {
     const val width = 200f
-    const val portPadding = 10f
+    private const val portPadding = 10f
     const val portSpacing = PortDrawOptions.portHeight + portPadding
     const val titleUnderlineY = 2f * DrawOptions.textSize + 13f
     const val portStartY = titleUnderlineY + portSpacing / 2f
