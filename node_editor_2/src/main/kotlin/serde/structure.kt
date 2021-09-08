@@ -33,6 +33,6 @@ class SerializeNode(
     @SerialName("_y") val y: Float,
     @SerialName("_name") val customName: String,
     @SerialName("_color") val tintColor: Int,
-    val inputPorts: Map<String, SerializeInPort>,
-    val outputPorts: Map<String, SerializeOutPort>
+    @SerialName("inputs") val inputPorts: Map<String, SerializeInPort>,
+    @SerialName("outputs") val outputPorts: Map<String, SerializeOutPort>
 )

@@ -13,7 +13,7 @@ object NodeDrawOptions {
     /**
      * Vertical space between ports
      */
-    private const val portPadding = 10f
+    private const val portPadding = 0f
 
     /**
      * Vertical spacing from center to center of ports
@@ -71,7 +71,7 @@ enum class NodeType(
         "sinosc", arrayOf(
             PortDescription("freq", 0f, true),
             PortDescription("phase", 0f, true),
-            PortDescription("vol", 1f, true),
+            PortDescription("vol", 0f, true),
             PortDescription("feedback", 0f, true),
             PortDescription("out", 0f, false),
         )

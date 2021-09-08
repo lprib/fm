@@ -1,10 +1,15 @@
 import kotlinx.serialization.ExperimentalSerializationApi
 import processing.core.PApplet
+import serde.deserializePatch
+import serde.serializePatch
+import javax.swing.JFileChooser
 import javax.swing.UIManager
 
 @ExperimentalSerializationApi
 fun main() {
     try {
+        System.setProperty("awt.useSystemAAFontSettings", "on")
+        System.setProperty("swing.aatext", "true")
         UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
     } catch (e: Exception) {
         // ignore
@@ -40,6 +45,7 @@ class Main : PApplet() {
     private var selection: SelectableObject? = null
     private var linkStartedPort: Port? = null
     private val notify = NotificationQueue()
+    private val choose = JFileChooser()
 
     override fun settings() {
         size(1400, 800)
@@ -85,12 +91,8 @@ class Main : PApplet() {
                 is InputPort -> (selection as InputPort).editBiasValue(this)
                 is Node -> (selection as Node).editTintColor(this)
             }
-            'p' -> println(serde.serializePatch(nodes, links))
-            'l' -> {
-                val (anodes, alinks) = serde.deserializePatch(patch1, width.toFloat())
-                nodes = anodes
-                links = alinks
-            }
+            'f' -> loadPatch()
+            'F' -> savePatch()
         }
     }
 
@@ -184,6 +186,27 @@ class Main : PApplet() {
             is Node -> {
                 links.removeAll { it.inputPort.parent == selection || it.outputPort.parent == selection }
                 nodes.remove(selection)
+            }
+        }
+    }
+
+    private fun loadPatch() {
+        val ret = choose.showOpenDialog(frame)
+        if (ret == JFileChooser.APPROVE_OPTION) {
+            notify.send(this, "Loading patch ${choose.selectedFile.name}")
+            val str = choose.selectedFile.bufferedReader().use { it.readText() }
+            val (newNodes, newLinks) = deserializePatch(str, width.toFloat())
+            nodes = newNodes
+            links = newLinks
+        }
+    }
+
+    private fun savePatch() {
+        val ret = choose.showSaveDialog(frame)
+        if (ret == JFileChooser.APPROVE_OPTION) {
+            notify.send(this, "Saving patch to ${choose.selectedFile.name}")
+            choose.selectedFile.bufferedWriter().use {
+                it.write(serializePatch(nodes, links))
             }
         }
     }

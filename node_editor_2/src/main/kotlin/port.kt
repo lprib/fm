@@ -2,7 +2,7 @@ import processing.core.PApplet
 import javax.swing.JOptionPane
 
 object PortDrawOptions {
-    const val ellipseSize = 20f
+    const val ellipseSize = 25f
     const val portHeight = ellipseSize
     const val textInset = 15f
     const val selectedTextInset = 25f
