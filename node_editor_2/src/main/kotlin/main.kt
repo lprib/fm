@@ -1,7 +1,9 @@
+import kotlinx.serialization.ExperimentalSerializationApi
 import processing.core.PApplet
 import javax.swing.UIManager
 
-fun main(args: Array<String>) {
+@ExperimentalSerializationApi
+fun main() {
     try {
         UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel")
     } catch (e: Exception) {
@@ -23,6 +25,7 @@ object DrawOptions {
     const val textSize = 14f
 }
 
+@ExperimentalSerializationApi
 class Main : PApplet() {
     private var nodes = mutableListOf<Node>()
     private var links = mutableListOf<Link>()
@@ -44,7 +47,7 @@ class Main : PApplet() {
 
     override fun draw() {
         background(DrawOptions.bgColor)
-        getSelection()
+        findSelection()
         drawables.forEach { it.draw(this) }
 
         linkStartedPort?.let {
@@ -74,19 +77,18 @@ class Main : PApplet() {
                 is InputPort -> (selection as InputPort).editBiasValue(this)
                 is Node -> (selection as Node).editTintColor(this)
             }
+            'p' -> println(serialization.serializePath(nodes, links))
         }
     }
 
-    private fun getSelection() {
+    private fun findSelection() {
         selectables.forEach { it.selected = false }
         selection = selectables.find { it.contains(Vec2(mouseX.toFloat(), mouseY.toFloat())) }
         selection?.selected = true
     }
 
     private fun createNode(type: NodeType) {
-        if (selection is Node) {
-            (selection as? Node)?.mouseSnapped = false
-        }
+        nodes.forEach { it.selected = false }
         val new = Node(type)
         new.mouseSnapped = true
         nodes.add(new)

@@ -50,14 +50,15 @@ class InputPort(parent: Node, name: String, location: Vec2, var multValue: Float
             // only display multiplier if this port has a connected link (otherwise the mult will have no effect)
             if (hasConnectedLink) {
                 p.fill(DrawOptions.portMultTextColor)
-                val multString = "x%.2f".format(multValue)
+                val multString = "x%.4f".format(multValue).formatPrecision()
                 p.text(multString, textX, location.y)
                 textX += p.textWidth(multString) + 5f
             }
             // only display bias if it is not zero
-            if (biasValue != 0f) {
+            if (!hasConnectedLink || biasValue != 0f) {
                 p.fill(DrawOptions.portBiasTextColor)
-                p.text("+%.2f".format(biasValue), textX, location.y)
+                val formatText = if (biasValue >= 0f) "+%.4f" else "%.4f"
+                p.text(formatText.format(biasValue).formatPrecision(), textX, location.y)
             }
         }
     }
@@ -75,6 +76,9 @@ class InputPort(parent: Node, name: String, location: Vec2, var multValue: Float
             input?.let { biasValue = input }
         }
     }
+
+    // remove trailing zeros and period
+    private fun String.formatPrecision(): String = this.trimEnd('0').trimEnd('.')
 }
 
 class OutputPort(parent: Node, name: String, location: Vec2) : Port(parent, name, location) {

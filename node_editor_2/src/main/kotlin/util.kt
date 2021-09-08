@@ -11,7 +11,7 @@ interface SelectableObject : Drawable {
     fun contains(p: Vec2): Boolean
 }
 
-data class Vec2(val x: Float, val y: Float) {
+data class Vec2(val x: Float = 0f, val y: Float = 0f) {
     operator fun plus(other: Vec2): Vec2 = Vec2(x + other.x, y + other.y)
     fun distanceTo(other: Vec2): Float = sqrt((other.x - x).pow(2) + (other.y - y).pow(2))
 }

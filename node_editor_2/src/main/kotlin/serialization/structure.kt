@@ -1,13 +1,11 @@
 package serialization
 
-import InputPort
-import Node
-import Port
+import NodeType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class Patch(val nodes: Array<SerializeNode>)
+class Patch(val nodes: Array<SerializeNode>, val io: IO)
 
 @Serializable
 class IO(
@@ -17,16 +15,15 @@ class IO(
     val rchan: Int? = null
 )
 
-@Serializable
-class SerializeInPort(val mult: Float, val bias: Float, val link: Int? = null) {
-    companion object {
-        fun fromPort(port: InputPort, allocations: HashMap<Port, Int>): SerializeInPort =
-            SerializeInPort(port.multValue, port.biasValue, allocations[port])
-    }
+sealed class SerializePort {
+    abstract val link: Int?
 }
 
 @Serializable
-class SerializeOutPort(val link: Int? = null)
+class SerializeInPort(val mult: Float, val bias: Float, override val link: Int? = null) : SerializePort()
+
+@Serializable
+class SerializeOutPort(override val link: Int? = null) : SerializePort()
 
 @Serializable
 sealed class SerializeNode {
@@ -34,6 +31,9 @@ sealed class SerializeNode {
     abstract val y: Float
     abstract val customName: String
     abstract val tintColor: Int
+
+    abstract val ports: Iterator<SerializePort>
+    abstract val type: NodeType
 }
 
 @Serializable
@@ -52,23 +52,10 @@ class SinOsc(
     val vol: SerializeInPort,
     val feedback: SerializeInPort,
     val out: SerializeOutPort
-) :
-    SerializeNode() {
-
-    companion object {
-        fun fromNode(node: Node, allocations: HashMap<Port, Int>): SinOsc =
-            SinOsc(
-                node.location.x,
-                node.location.y,
-                node.customName,
-                node.tintColor,
-                SerializeInPort.fromPort(node.inputPorts[0], allocations),
-                SerializeInPort.fromPort(node.inputPorts[1], allocations),
-                SerializeInPort.fromPort(node.inputPorts[2], allocations),
-                SerializeInPort.fromPort(node.inputPorts[3], allocations),
-                SerializeOutPort(allocations[node.outputPorts[0]])
-            )
-    }
+) : SerializeNode() {
+    override val ports: Iterator<SerializePort>
+        get() = listOf(freq, phase, vol, feedback, out).iterator()
+    override val type: NodeType get() = NodeType.SINOSC
 }
 
 @Serializable
@@ -88,23 +75,10 @@ class Adsr(
     val s: SerializeInPort,
     val r: SerializeInPort,
     val out: SerializeOutPort
-) :
-    SerializeNode() {
-    companion object {
-        fun fromNode(node: Node, allocations: HashMap<Port, Int>): Adsr =
-            Adsr(
-                node.location.x,
-                node.location.y,
-                node.customName,
-                node.tintColor,
-                SerializeInPort.fromPort(node.inputPorts[0], allocations),
-                SerializeInPort.fromPort(node.inputPorts[1], allocations),
-                SerializeInPort.fromPort(node.inputPorts[2], allocations),
-                SerializeInPort.fromPort(node.inputPorts[3], allocations),
-                SerializeInPort.fromPort(node.inputPorts[4], allocations),
-                SerializeOutPort(allocations[node.outputPorts[0]])
-            )
-    }
+) : SerializeNode() {
+    override val ports: Iterator<SerializePort>
+        get() = listOf(gate, a, d, s, r, out).iterator()
+    override val type: NodeType get() = NodeType.ADSR
 }
 
 @Serializable
@@ -123,20 +97,8 @@ class Mixer(
     val in3: SerializeInPort,
     val in4: SerializeInPort,
     val out: SerializeOutPort
-) :
-    SerializeNode() {
-    companion object {
-        fun fromNode(node: Node, allocations: HashMap<Port, Int>): Mixer =
-            Mixer(
-                node.location.x,
-                node.location.y,
-                node.customName,
-                node.tintColor,
-                SerializeInPort.fromPort(node.inputPorts[0], allocations),
-                SerializeInPort.fromPort(node.inputPorts[1], allocations),
-                SerializeInPort.fromPort(node.inputPorts[2], allocations),
-                SerializeInPort.fromPort(node.inputPorts[3], allocations),
-                SerializeOutPort(allocations[node.outputPorts[0]])
-            )
-    }
+) : SerializeNode() {
+    override val ports: Iterator<SerializePort>
+        get() = listOf(in1, in2, in3, in4, out).iterator()
+    override val type: NodeType get() = NodeType.MIXER
 }

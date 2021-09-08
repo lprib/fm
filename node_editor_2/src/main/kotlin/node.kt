@@ -6,7 +6,7 @@ import kotlin.math.max
 
 object NodeDrawOptions {
     const val width = 200f
-    const val portPadding = 10f;
+    const val portPadding = 10f
     const val portSpacing = PortDrawOptions.portHeight + portPadding
     const val titleUnderlineY = 2f * DrawOptions.textSize + 13f
     const val portStartY = titleUnderlineY + portSpacing / 2f
@@ -41,7 +41,6 @@ enum class NodeType(
             PortDescription("phase", 0f, true),
             PortDescription("vol", 1f, true),
             PortDescription("feedback", 0f, true),
-            PortDescription("mult", 1f, true),
             PortDescription("out", 0f, false),
         )
     ),
@@ -51,9 +50,7 @@ enum class NodeType(
             PortDescription("in1", 0f, true),
             PortDescription("in2", 0f, true),
             PortDescription("in3", 0f, true),
-            PortDescription("mix1", 1f, true),
-            PortDescription("mix2", 1f, true),
-            PortDescription("mix3", 1f, true),
+            PortDescription("in4", 0f, true),
             PortDescription("out", 0f, false),
         )
     ),
@@ -80,7 +77,20 @@ open class Node(
         type.ports.filter { !it.input }.size
     ) * NodeDrawOptions.portSpacing + NodeDrawOptions.titleUnderlineY
 
-    val ports = generatePorts(type)
+    val inputPorts: List<InputPort> = type.ports.filter { it.input }.withIndex().map { (idx, p) ->
+        p.toPort(
+            this,
+            Vec2(0f, NodeDrawOptions.portStartY + idx.toFloat() * NodeDrawOptions.portSpacing)
+        ) as InputPort
+    }
+
+    val outputPorts: List<OutputPort> = type.ports.filter { !it.input }.withIndex().map { (idx, p) ->
+        p.toPort(
+            this,
+            Vec2(width, NodeDrawOptions.portStartY + idx.toFloat() * NodeDrawOptions.portSpacing)
+        ) as OutputPort
+    }
+    val ports: Iterable<Port> get() = inputPorts.asIterable().plus(outputPorts.asIterable())
 
     open fun editCustomName(p: PApplet) {
         val input: String? = JOptionPane.showInputDialog(p.frame, "Enter name")
@@ -90,22 +100,6 @@ open class Node(
     open fun editTintColor(p: PApplet) {
         val awtColor: Color? = JColorChooser.showDialog(p.frame, "Node Color", Color(DrawOptions.nodeFillColor))
         awtColor?.let { tintColor = awtColor.rgb }
-    }
-
-    private fun generatePorts(type: NodeType): List<Port> {
-        val inputPorts = type.ports.filter { it.input }.withIndex().map { (idx, p) ->
-            p.toPort(
-                this,
-                Vec2(0f, NodeDrawOptions.portStartY + idx.toFloat() * NodeDrawOptions.portSpacing)
-            )
-        }
-        val outputPorts = type.ports.filter { !it.input }.withIndex().map { (idx, p) ->
-            p.toPort(
-                this,
-                Vec2(width, NodeDrawOptions.portStartY + idx.toFloat() * NodeDrawOptions.portSpacing)
-            )
-        }
-        return inputPorts + outputPorts
     }
 
     override fun contains(p: Vec2): Boolean =
@@ -166,8 +160,8 @@ class IntrinsicNode(type: NodeType, location: Vec2) : Node(type, location, "", D
     override fun editTintColor(p: PApplet) {}
 }
 
-fun getIntrinsics(windowWidth: Float): List<Node> =
-    listOf(
+fun getIntrinsics(windowWidth: Float): ArrayList<Node> =
+    arrayListOf(
         IntrinsicNode(NodeType.FREQ, Vec2(20f, 20f)),
         IntrinsicNode(NodeType.GATE, Vec2(20f, 120f)),
         IntrinsicNode(NodeType.LCHAN, Vec2(windowWidth - NodeDrawOptions.width - 20f, 20f)),
