@@ -59,7 +59,7 @@
                 </executions>
                 <configuration>
                     <compilerPlugins>
-                        <plugin>kotlinx-serialization</plugin>
+                        <plugin>kotlinx-serde</plugin>
                     </compilerPlugins>
                 </configuration>
                 <dependencies>

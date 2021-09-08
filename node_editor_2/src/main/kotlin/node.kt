@@ -20,7 +20,7 @@ data class PortDescription(val name: String, val defaultBias: Float, val input: 
 }
 
 enum class NodeType(
-    val nodeName: String,
+    val typeName: String,
     val ports: Array<PortDescription>,
 ) {
     ADSR(
@@ -59,7 +59,11 @@ enum class NodeType(
     FREQ("freq", arrayOf(PortDescription("out", 0f, false))),
     GATE("gate", arrayOf(PortDescription("out", 0f, false))),
     RCHAN("rchan", arrayOf(PortDescription("in", 0f, true))),
-    LCHAN("lchan", arrayOf(PortDescription("in", 0f, true))),
+    LCHAN("lchan", arrayOf(PortDescription("in", 0f, true)));
+
+    companion object {
+        fun fromName(name: String): NodeType? = values().find { it.typeName == name }
+    }
 }
 
 open class Node(
@@ -135,7 +139,7 @@ open class Node(
         p.text(customName, width / 2f, 0f)
         p.fill(DrawOptions.uiColor)
         p.textSize(DrawOptions.textSize)
-        p.text(type.nodeName, width / 2f, NodeDrawOptions.titleTextSize + 4f)
+        p.text(type.typeName, width / 2f, NodeDrawOptions.titleTextSize + 4f)
 
         ports.forEach {
             it.draw(p)
