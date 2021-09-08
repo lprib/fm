@@ -14,6 +14,10 @@ import kotlinx.serialization.json.Json
 //val jsonFormatter = Json { prettyPrint = true }
 val jsonFormatter = Json
 
+/**
+ * Return the JSON string specifying the given [nodes] and [links] graph structure.
+ * The JSON will be serialized in accordance to the [Patch] structure.
+ */
 @ExperimentalSerializationApi
 fun serializePatch(nodes: List<Node>, links: List<Link>): String {
     // contains the mapping from port to programState index identifier
@@ -43,9 +47,12 @@ fun serializePatch(nodes: List<Node>, links: List<Link>): String {
     return jsonFormatter.encodeToString(patch)
 }
 
-private fun linkValueFromIntrinsic(nodes: List<Node>, type: NodeType, allocations: HashMap<Port, Int>): Int? =
-    allocations[nodes.find { it.type == type }?.ports?.first()]
-
+/**
+ * Find the intrinsic node of [type] in the list [nodes]. Get its link allocation index from the [allocations] map.
+ */
+private fun linkValueFromIntrinsic(
+    nodes: List<Node>, type: NodeType, allocations: HashMap<Port, Int>
+): Int? = allocations[nodes.find { it.type == type }?.ports?.first()]
 
 fun InputPort.toSerialized(allocations: HashMap<Port, Int>): SerializeInPort =
     SerializeInPort(multValue, biasValue, allocations[this])
@@ -53,16 +60,12 @@ fun InputPort.toSerialized(allocations: HashMap<Port, Int>): SerializeInPort =
 fun OutputPort.toSerialized(allocations: HashMap<Port, Int>): SerializeOutPort =
     SerializeOutPort(allocations[this])
 
-fun Node.toSerialized(allocations: HashMap<Port, Int>): SerializeNode =
-    SerializeNode(
-        type.typeName,
-        location.x,
-        location.y,
-        customName,
-        tintColor,
-        inputPorts.associateBy { it.name }.mapValues { (_, v) -> v.toSerialized(allocations) },
-        outputPorts.associateBy { it.name }.mapValues { (_, v) -> v.toSerialized(allocations) }
-    )
-
+fun Node.toSerialized(allocations: HashMap<Port, Int>): SerializeNode = SerializeNode(type.typeName,
+    location.x,
+    location.y,
+    customName,
+    tintColor,
+    inputPorts.associateBy { it.name }.mapValues { (_, v) -> v.toSerialized(allocations) },
+    outputPorts.associateBy { it.name }.mapValues { (_, v) -> v.toSerialized(allocations) })
 
 //fun SerializeNode.toNode()

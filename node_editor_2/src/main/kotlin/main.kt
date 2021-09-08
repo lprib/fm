@@ -34,7 +34,8 @@ object DrawOptions {
 class Main : PApplet() {
     private var nodes = mutableListOf<Node>()
     private var links = mutableListOf<Link>()
-    private val selectables: Iterable<SelectableObject> get() = nodes.flatMap { it.ports }.plus(nodes)
+    private val selectables: Iterable<SelectableObject>
+        get() = nodes.flatMap { it.ports }.plus(nodes)
     private val drawables: Iterable<Drawable> get() = nodes.asIterable().plus(links.asIterable())
     private var selection: SelectableObject? = null
     private var linkStartedPort: Port? = null
@@ -93,19 +94,31 @@ class Main : PApplet() {
         }
     }
 
+    /**
+     * Iterate over all selectables, and find the first one that is under the cursor.
+     * Mark this object as selected and all others as not selected.
+     */
     private fun findSelection() {
         selectables.forEach { it.selected = false }
         selection = selectables.find { it.contains(Vec2(mouseX.toFloat(), mouseY.toFloat())) }
         selection?.selected = true
     }
 
+    /**
+     * Create node of [type]. Unsnap all nodes, and snap the new node to the mouse.
+     */
     private fun createNode(type: NodeType) {
-        nodes.forEach { it.selected = false }
+        nodes.forEach { it.mouseSnapped = false }
         val new = Node(type)
         new.mouseSnapped = true
         nodes.add(new)
     }
 
+    /**
+     * If a link is already started but not completed, try to complete the link to the
+     * selected port if any, see [tryCreateLink].
+     * If a link has not been started, start a link from the selected port if any
+     */
     private fun connectOrCreateLink() {
         if (linkStartedPort == null) {
             // Create new link start
@@ -123,6 +136,10 @@ class Main : PApplet() {
         }
     }
 
+    /**
+     * Attempt to create a link from [a] to [b]. [a] and [b] can be arbitrary input or output ports.
+     * If the link cannot be created, posts a notification.
+     */
     private fun tryCreateLink(a: Port, b: Port) {
         if (a.parent == b.parent) {
             notify.send(this, "Link cannot connect to same node")
@@ -147,6 +164,10 @@ class Main : PApplet() {
         links.add(newLink)
     }
 
+    /**
+     * Attempt to delete the selected object, be it link or node.
+     * If a port is selected, all the links to that port will be deleted.
+     */
     private fun deleteNodeOrLink() {
         when (selection) {
             is Port -> links.removeAll {

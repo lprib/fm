@@ -6,8 +6,15 @@ interface Drawable {
     fun draw(p: PApplet)
 }
 
+/**
+ * An object that is selectable by the user.
+ */
 interface SelectableObject : Drawable {
     var selected: Boolean
+
+    /**
+     * Should return true when the point [p] lies within this objects border
+     */
     fun contains(p: Vec2): Boolean
 }
 
@@ -16,6 +23,10 @@ data class Vec2(val x: Float = 0f, val y: Float = 0f) {
     fun distanceTo(other: Vec2): Float = sqrt((other.x - x).pow(2) + (other.y - y).pow(2))
 }
 
+/**
+ * Create a 32bit integer in ARGB format from the specified color string [s].
+ * [s] can be of the form "#RRGGBB" or "#RRGGBBAA"
+ */
 fun color(s: String): Int {
     if (!s.startsWith("#")) {
         throw IllegalArgumentException("Color definition must start with '#'")
@@ -29,6 +40,9 @@ fun color(s: String): Int {
     throw IllegalArgumentException("Color must have either 7 or 9 characters")
 }
 
+/**
+ * Draw a Bezier curve from [start] to [end], with dynamically placed control points.
+ */
 fun drawBezier(p: PApplet, start: Vec2, end: Vec2) {
     val left = if (start.x < end.x) start else end
     val right = if (start.x >= end.x) start else end

@@ -14,7 +14,8 @@ abstract class Port(val parent: Node, val name: String, val location: Vec2) : Se
     protected val inset: Float
         get() = if (selected) PortDrawOptions.selectedTextInset else PortDrawOptions.textInset
 
-    override fun contains(p: Vec2): Boolean = p.distanceTo(absoluteLocation) <= PortDrawOptions.ellipseSize / 2f
+    override fun contains(p: Vec2): Boolean =
+        p.distanceTo(absoluteLocation) <= PortDrawOptions.ellipseSize / 2f
 
     val absoluteLocation: Vec2 get() = parent.location + location
 
@@ -27,13 +28,16 @@ abstract class Port(val parent: Node, val name: String, val location: Vec2) : Se
         if (selected) {
             p.noStroke()
             p.fill(DrawOptions.highlightOverlayColor)
-            p.ellipse(location.x, location.y, PortDrawOptions.ellipseSize, PortDrawOptions.ellipseSize)
+            p.ellipse(
+                location.x, location.y, PortDrawOptions.ellipseSize, PortDrawOptions.ellipseSize
+            )
         }
     }
 }
 
-class InputPort(parent: Node, name: String, location: Vec2, var multValue: Float, var biasValue: Float = 0f) :
-    Port(parent, name, location) {
+class InputPort(
+    parent: Node, name: String, location: Vec2, var multValue: Float, var biasValue: Float = 0f
+) : Port(parent, name, location) {
     var hasConnectedLink = false
 
     override fun draw(p: PApplet) {
@@ -65,14 +69,16 @@ class InputPort(parent: Node, name: String, location: Vec2, var multValue: Float
 
     fun editMultValue(p: PApplet) {
         if (parent !is IntrinsicNode) {
-            val input: Float? = JOptionPane.showInputDialog(p.frame, "Enter mult value")?.toFloatOrNull()
+            val input: Float? =
+                JOptionPane.showInputDialog(p.frame, "Enter mult value")?.toFloatOrNull()
             input?.let { multValue = input }
         }
     }
 
     fun editBiasValue(p: PApplet) {
         if (parent !is IntrinsicNode) {
-            val input: Float? = JOptionPane.showInputDialog(p.frame, "Enter bias value")?.toFloatOrNull()
+            val input: Float? =
+                JOptionPane.showInputDialog(p.frame, "Enter bias value")?.toFloatOrNull()
             input?.let { biasValue = input }
         }
     }

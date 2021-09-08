@@ -12,10 +12,7 @@ class Patch(val nodes: Array<SerializeNode>, val io: IO)
 // ie. IO: Hashmap<String, Int?>...
 @Serializable
 class IO(
-    val freq: Int? = null,
-    val gate: Int? = null,
-    val lchan: Int? = null,
-    val rchan: Int? = null
+    val freq: Int? = null, val gate: Int? = null, val lchan: Int? = null, val rchan: Int? = null
 )
 
 sealed class SerializePort {
@@ -23,7 +20,8 @@ sealed class SerializePort {
 }
 
 @Serializable
-class SerializeInPort(val mult: Float, val bias: Float, override val link: Int? = null) : SerializePort()
+class SerializeInPort(val mult: Float, val bias: Float, override val link: Int? = null) :
+    SerializePort()
 
 @Serializable
 class SerializeOutPort(override val link: Int? = null) : SerializePort()
