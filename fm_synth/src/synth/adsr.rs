@@ -2,29 +2,15 @@ use super::{
     serialized::{InPort, OutPort},
     DspNode, ProgramState,
 };
-use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[serde(rename_all = "lowercase")]
-pub struct Adsr {
-    pub gate: InPort,
-    pub a: InPort,
-    pub d: InPort,
-    pub s: InPort,
-    pub r: InPort,
-    #[serde(default)]
-    pub out: OutPort,
-    // Time of most recent gate rising edge
-    #[serde(skip)]
-    gate_start: f64,
-    // Time of most recent gate falling edge
-    #[serde(skip)]
-    gate_end: f64,
-    // previous value of gate, to detect edges
-    #[serde(skip)]
-    prev_gate: bool,
-    #[serde(skip)]
-    releasing: bool,
+node_definition!{
+    #[derive(Clone, Debug)]
+    Adsr(gate, a, d, s, r => out) {
+        gate_start: f64,
+        gate_end: f64,
+        prev_gate: bool,
+        releasing: bool,
+    }
 }
 
 impl Default for Adsr {

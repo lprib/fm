@@ -1,6 +1,7 @@
+#[macro_use]
+pub mod serialized;
 pub mod adsr;
 pub mod mixer;
-pub mod serialized;
 pub mod sinosc;
 pub mod voice;
 

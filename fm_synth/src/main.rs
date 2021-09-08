@@ -7,11 +7,11 @@ use crate::synth::{serialized::PatchDefinition, Patch};
 use midi::{get_midi_input, parse_midi};
 use rodio::{OutputStream, Sink};
 
-fn main2() {
+fn main() {
     let (tx, rx) = channel();
 
     let patch_str =
-        fs::read_to_string("../node_editor/data/simple.json").expect("couldnt read file");
+        fs::read_to_string("../test.json").expect("couldnt read file");
     let patch_def: PatchDefinition = serde_json::from_str(&patch_str).expect("couldnt parse");
     let patch = Patch::new(patch_def, rx);
 
@@ -37,7 +37,7 @@ fn main2() {
     sink.sleep_until_end();
 }
 
-fn main() {
+fn main2() {
     ws::listen("localhost:8089", |client| {
         println!("New connection");
         move |msg| {
