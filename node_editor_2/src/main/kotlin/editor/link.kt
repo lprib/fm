@@ -1,3 +1,5 @@
+package editor
+
 import processing.core.PApplet
 
 object LinkDrawOptions {
@@ -15,14 +17,18 @@ class Link(val inputPort: InputPort, val outputPort: OutputPort) : Drawable {
         drawBezier(p, inputPort.absoluteLocation, outputPort.absoluteLocation)
         p.noStroke()
         p.fill(DrawOptions.linkColor)
-        p.ellipse(inputPort.absoluteLocation.x,
+        p.ellipse(
+            inputPort.absoluteLocation.x,
             inputPort.absoluteLocation.y,
             LinkDrawOptions.ellipseSize,
-            LinkDrawOptions.ellipseSize)
-        p.ellipse(outputPort.absoluteLocation.x,
+            LinkDrawOptions.ellipseSize
+        )
+        p.ellipse(
+            outputPort.absoluteLocation.x,
             outputPort.absoluteLocation.y,
             LinkDrawOptions.ellipseSize,
-            LinkDrawOptions.ellipseSize)
+            LinkDrawOptions.ellipseSize
+        )
     }
 
     /**

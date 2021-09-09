@@ -1,12 +1,6 @@
 package serde
 
-import InputPort
-import Link
-import Node
-import NodeType
-import OutputPort
-import Vec2
-import getIntrinsics
+import editor.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 

@@ -1,3 +1,5 @@
+package editor
+
 import processing.core.PApplet
 import kotlin.math.pow
 import kotlin.math.sqrt

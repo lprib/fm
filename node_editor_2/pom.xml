@@ -4,11 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.lprib.node_editor_2</groupId>
+    <groupId>com.lprib</groupId>
     <artifactId>node_editor_2</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
+        <main.class>editor.MainKt</main.class>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <kotlin.version>1.5.30</kotlin.version>
@@ -27,7 +28,7 @@
         <dependency>
             <groupId>org.processing</groupId>
             <artifactId>core</artifactId>
-            <version>3.3.7</version>
+            <version>3.5.4</version>
         </dependency>
 
         <dependency>
@@ -41,6 +42,7 @@
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <plugins>
+            <!--kotlin compiler-->
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -53,7 +55,6 @@
                             <goal>compile</goal>
                         </goals>
                     </execution>
-
                     <execution>
                         <id>test-compile</id>
                         <goals>
@@ -61,6 +62,8 @@
                         </goals>
                     </execution>
                 </executions>
+
+                <!--kotlinx serialization compiler plugin-->
                 <configuration>
                     <compilerPlugins>
                         <plugin>kotlinx-serialization</plugin>
@@ -73,6 +76,21 @@
                         <version>${kotlin.version}</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>${main.class}</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>

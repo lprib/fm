@@ -1,3 +1,5 @@
+package editor
+
 import kotlinx.serialization.ExperimentalSerializationApi
 import processing.core.PApplet
 import serde.deserializePatch
@@ -14,12 +16,8 @@ fun main() {
     } catch (e: Exception) {
         // ignore
     }
-    PApplet.main("Main")
+    PApplet.main("editor.Main")
 }
-
-val patch1 = """
-{ "nodes":[{ "type":"adsr", "_x":227.0, "_y":397.5, "_name":"", "_color":-13154481, "inputPorts":{ "gate":{ "mult":1.0, "bias":0.0, "link":0 }, "a":{ "mult":1.0, "bias":0.0 }, "d":{ "mult":1.0, "bias":0.0 }, "s":{ "mult":1.0, "bias":1.0 }, "r":{ "mult":1.0, "bias":0.0 } }, "outputPorts":{ "out":{ "link":1 } } },{ "type":"sinosc", "_x":491.0, "_y":235.5, "_name":"", "_color":-13154481, "inputPorts":{ "freq":{ "mult":1.0, "bias":0.0, "link":2 }, "phase":{ "mult":1.0, "bias":0.0 }, "vol":{ "mult":1.0, "bias":0.0, "link":1 }, "feedback":{ "mult":1.0, "bias":0.0 } }, "outputPorts":{ "out":{ "link":3 } } },{ "type":"sinosc", "_x":868.0, "_y":157.5, "_name":"", "_color":-13154481, "inputPorts":{ "freq":{ "mult":1.0, "bias":0.0, "link":2 }, "phase":{ "mult":1.0, "bias":0.0, "link":3 }, "vol":{ "mult":1.0, "bias":0.0, "link":1 }, "feedback":{ "mult":1.0, "bias":0.0 } }, "outputPorts":{ "out":{ "link":4 } } }], "io":{ "freq":2, "gate":0, "lchan":4, "rchan":4 } }
-"""
 
 object DrawOptions {
     val bgColor = color("#102027")
@@ -54,7 +52,6 @@ class Main : PApplet() {
 
     override fun setup() {
         textSize(DrawOptions.textSize)
-        println(DrawOptions.linkColor)
         nodes.addAll(getIntrinsics(width.toFloat()))
     }
 

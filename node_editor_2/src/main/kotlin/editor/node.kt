@@ -1,3 +1,5 @@
+package editor
+
 import processing.core.PApplet
 import java.awt.Color
 import javax.swing.JColorChooser

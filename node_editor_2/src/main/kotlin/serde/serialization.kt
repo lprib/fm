@@ -1,12 +1,6 @@
 package serde
 
-import InputPort
-import IntrinsicNode
-import Link
-import Node
-import NodeType
-import OutputPort
-import Port
+import editor.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

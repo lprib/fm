@@ -1,3 +1,5 @@
+package editor
+
 import processing.core.PApplet
 import javax.swing.JOptionPane
 

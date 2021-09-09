@@ -1,3 +1,5 @@
+package editor
+
 import processing.core.PApplet
 
 object NotificationOptions {
