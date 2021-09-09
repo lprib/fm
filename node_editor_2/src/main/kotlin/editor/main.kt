@@ -4,6 +4,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import processing.core.PApplet
 import serde.deserializePatch
 import serde.serializePatch
+import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.UIManager
 
@@ -27,11 +28,25 @@ object DrawOptions {
     val highlightOverlayColor = color("#ffffff22")
     val nodeFillColor = color("#37474f")
     val nodeTitleColor = color("#ffffff")
-    val linkColor = color("#90a4ae96")
-    val intrinsicTintColor = color("#003c96")
-    val notificationColor = color("#7f0000")
+    val linkColor = color("#90a4ae90")
+    val defaultTintColor = color("#d11e02")
+    val intrinsicTintColor = color("#1a60c9")
+    val notificationColor = color("#7f0000BB")
     const val textSize = 14f
 }
+
+val helpText = """
+        s: create sinosc
+        a: create adsr
+        A: create mixer
+        c: create or finish link
+        d: delete node or links
+        e: (node) edit name, (port) edit bias value
+        E: (node) edit tint color, (port) edit mult value
+        f: load patch from file
+        F: save patch to file
+        h: display this help
+    """.trimIndent()
 
 @ExperimentalSerializationApi
 class Main : PApplet() {
@@ -39,7 +54,8 @@ class Main : PApplet() {
     private var links = mutableListOf<Link>()
     private val selectables: Iterable<SelectableObject>
         get() = nodes.flatMap { it.ports }.plus(nodes)
-    private val drawables: Iterable<Drawable> get() = nodes.asIterable().plus(links.asIterable())
+    private val drawables: Iterable<Drawable>
+        get() = nodes.asIterable().plus(links.asIterable())
     private var selection: SelectableObject? = null
     private var linkStartedPort: Port? = null
     private val notify = NotificationQueue()
@@ -53,6 +69,8 @@ class Main : PApplet() {
     override fun setup() {
         textSize(DrawOptions.textSize)
         nodes.addAll(getIntrinsics(width.toFloat()))
+        val currentPath = System.getProperty("user.dir")
+        choose.currentDirectory = File(currentPath)
     }
 
     override fun draw() {
@@ -81,15 +99,17 @@ class Main : PApplet() {
             'c' -> connectOrCreateLink()
             'd' -> deleteNodeOrLink()
             'e' -> when (selection) {
-                is InputPort -> (selection as InputPort).editMultValue(this)
+                is InputPort -> (selection as InputPort).editBiasValue(this)
                 is Node -> (selection as Node).editCustomName(this)
             }
             'E' -> when (selection) {
-                is InputPort -> (selection as InputPort).editBiasValue(this)
+                is InputPort -> (selection as InputPort).editMultValue(this)
                 is Node -> (selection as Node).editTintColor(this)
             }
             'f' -> loadPatch()
             'F' -> savePatch()
+            'h' -> notify.send(this, helpText, 10000)
+            ESC -> key = 0.toChar()
         }
     }
 
@@ -192,9 +212,13 @@ class Main : PApplet() {
         if (ret == JFileChooser.APPROVE_OPTION) {
             notify.send(this, "Loading patch ${choose.selectedFile.name}")
             val str = choose.selectedFile.bufferedReader().use { it.readText() }
-            val (newNodes, newLinks) = deserializePatch(str, width.toFloat())
-            nodes = newNodes
-            links = newLinks
+            try {
+                val (newNodes, newLinks) = deserializePatch(str, width.toFloat())
+                nodes = newNodes
+                links = newLinks
+            } catch (e: Exception) {
+                notify.send(this, "Error loading patch: ${e.message}", 7000)
+            }
         }
     }
 

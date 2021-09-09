@@ -25,13 +25,18 @@ object NodeDrawOptions {
     /**
      * Vertical distance down from top of node where the underline separator between title and ports will be drawn.
      */
-    const val titleUnderlineY = 2f * DrawOptions.textSize + 13f
+    const val titleBlockHeight = 2f * DrawOptions.textSize + 13f
+
+    /**
+     * Padding between bottom of title block and start of first port, and between last port and bottom of node
+     */
+    const val portBlockVertPadding = 5f
 
     /**
      * Y value down from top of node where the first port will be drawn.
      * This is distance from top edge to center of the port.
      */
-    const val portStartY = titleUnderlineY + portSpacing / 2f
+    const val portStartY = titleBlockHeight + portSpacing / 2f + portBlockVertPadding
 
     /**
      * Alpha value that a node's tint will be given when it is overlayed
@@ -55,8 +60,7 @@ data class PortDescription(val name: String, val defaultBias: Float, val input: 
  * [typeName] is used in the JSON serde and used as the unique identifier for this type of node.
  */
 enum class NodeType(
-    val typeName: String,
-    val ports: Array<PortDescription>,
+    val typeName: String, val ports: Array<PortDescription>, val customName: String = ""
 ) {
     ADSR(
         "adsr",
@@ -89,10 +93,10 @@ enum class NodeType(
     ),
 
     // intrinsics
-    FREQ("freq", arrayOf(PortDescription("out", 0f, false))),
-    GATE("gate", arrayOf(PortDescription("out", 0f, false))),
-    RCHAN("rchan", arrayOf(PortDescription("in", 0f, true))),
-    LCHAN("lchan", arrayOf(PortDescription("in", 0f, true)));
+    FREQ("freq", arrayOf(PortDescription("out", 0f, false)), "Note Frequency"),
+    GATE("gate", arrayOf(PortDescription("out", 0f, false)), "Note Gate"),
+    RCHAN("rchan", arrayOf(PortDescription("in", 0f, true)), "Left Channel"),
+    LCHAN("lchan", arrayOf(PortDescription("in", 0f, true)), "Right Channel");
 
     companion object {
         fun fromName(name: String): NodeType? = values().find { it.typeName == name }
@@ -107,7 +111,7 @@ open class Node(
     val type: NodeType,
     var location: Vec2 = Vec2(0f, 0f),
     var customName: String = "",
-    var tintColor: Int = DrawOptions.nodeFillColor,
+    var tintColor: Int = DrawOptions.defaultTintColor,
 ) : SelectableObject {
     override var selected = false
     open var mouseSnapped = false
@@ -115,7 +119,7 @@ open class Node(
     private val width = NodeDrawOptions.width
     private val height =
         max(type.ports.filter { it.input }.size, type.ports.filter { !it.input }.size
-        ) * NodeDrawOptions.portSpacing + NodeDrawOptions.titleUnderlineY
+        ) * NodeDrawOptions.portSpacing + NodeDrawOptions.titleBlockHeight + 2 * NodeDrawOptions.portBlockVertPadding
 
     /**
      * Initialize input ports from those specified in [type]. Spread Y values over range
@@ -171,21 +175,23 @@ open class Node(
         p.pushMatrix()
         p.translate(location.x, location.y)
 
+        // Main rect
         p.strokeWeight(1f)
         p.stroke(DrawOptions.uiColor)
         p.fill(DrawOptions.nodeFillColor)
+        drawOutlineRect(p)
 
-        drawOutlineRect(p)
-        p.noStroke()
+        // title block rect
+        p.rect(0f, 0f, width, NodeDrawOptions.titleBlockHeight, 5f, 5f, 5f, 5f)
         p.fill((tintColor and 0xFFFFFF) or (NodeDrawOptions.tintAlpha shl 24))
-        drawOutlineRect(p)
+        p.rect(0f, 0f, width, NodeDrawOptions.titleBlockHeight, 5f, 5f, 5f, 5f)
+
+        // Selected highlight overlay
+        p.noStroke()
         if (selected) {
             p.fill(DrawOptions.highlightOverlayColor)
             drawOutlineRect(p)
         }
-        p.stroke(DrawOptions.uiColor)
-
-        p.line(0f, NodeDrawOptions.titleUnderlineY, width, NodeDrawOptions.titleUnderlineY)
 
         p.textAlign(PApplet.CENTER, PApplet.TOP)
         p.fill(DrawOptions.nodeTitleColor)
@@ -208,7 +214,7 @@ open class Node(
 }
 
 class IntrinsicNode(type: NodeType, location: Vec2) :
-    Node(type, location, "", DrawOptions.intrinsicTintColor) {
+    Node(type, location, type.customName, DrawOptions.intrinsicTintColor) {
     /**
      * Override the setter for [mouseSnapped] to do nothing.
      * The getter always returns false, so that the superclass implementation

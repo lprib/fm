@@ -3,7 +3,7 @@ package editor
 import processing.core.PApplet
 
 object LinkDrawOptions {
-    const val ellipseSize = 9f
+    const val ellipseSize = 10f
 }
 
 class Link(val inputPort: InputPort, val outputPort: OutputPort) : Drawable {
@@ -16,7 +16,8 @@ class Link(val inputPort: InputPort, val outputPort: OutputPort) : Drawable {
         p.strokeWeight(3f)
         drawBezier(p, inputPort.absoluteLocation, outputPort.absoluteLocation)
         p.noStroke()
-        p.fill(DrawOptions.linkColor)
+        // ellipses should be link color without transparency
+        p.fill(DrawOptions.linkColor or (0xFF shl 24))
         p.ellipse(
             inputPort.absoluteLocation.x,
             inputPort.absoluteLocation.y,
