@@ -42,8 +42,12 @@ fun deserializePatch(json: String, windowWidth: Float): Pair<ArrayList<Node>, Ar
 
         // Add entries in linkLookup structure for this node's input ports
         for (inputPort in newNode.inputPorts) {
-            val linkIdx = serializeNode.inputPorts[inputPort.name]?.link
-            linkIdx?.let { linkLookup.addConsumer(it, inputPort) }
+            val serializeInputPort = serializeNode.inputPorts[inputPort.name]
+            serializeInputPort?.let {
+                inputPort.multValue = it.mult
+                inputPort.biasValue = it.bias
+            }
+            serializeInputPort?.link?.let { linkLookup.addConsumer(it, inputPort) }
         }
 
         // Add entries in linkLookup structure for this node's input ports

@@ -19,7 +19,7 @@
 - [ ] MIDI mod wheel input?
 - [x] Detect long runs of DspNode that do not depend on anything else and run
   in parallel (WONT DO - run voicec in parallel instaed)
-- [ ] Support for attenuation and DC offset on all port inputs and outputs
+- [x] Support for attenuation and DC offset on all port inputs and outputs
   (reuse `const` param)
 - [ ] More useful node types
     - Fade between 2 inputs mixer
@@ -45,8 +45,8 @@
 ## Node editor
 - [x] allow metadata tags for nodes (color, custom name, etc.)
 - [ ] Generic node metadata, rather than hardcoded types
-- [ ] crashed on file not found
-- [ ] crashes on 'cancel' for color and node name
-- [ ] set working directory, patch browser?
+- [x] crashed on file not found
+- [x] crashes on 'cancel' for color and node name
+- [x] set working directory, patch browser?
 - [x] default value for node ports on initialization of node
-- [ ] separate compilation into transformation from (Node, Link) to (Node) and JSON serializing (2 steps)
+- [x] separate compilation into transformation from (Node, Link) to (Node) and JSON serializing (2 steps)

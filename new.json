@@ -1,0 +1,76 @@
+{
+  "nodes": [
+    {
+      "type": "adsr",
+      "_x": 345.0,
+      "_y": 248.5,
+      "_name": "",
+      "_color": -13154481,
+      "inputPorts": {
+        "gate": {
+          "mult": 1.0,
+          "bias": 0.0,
+          "link": 0
+        },
+        "a": {
+          "mult": 1.0,
+          "bias": 0.01
+        },
+        "d": {
+          "mult": 1.0,
+          "bias": 0.5
+        },
+        "s": {
+          "mult": 1.0,
+          "bias": 0.5
+        },
+        "r": {
+          "mult": 1.0,
+          "bias": 0.2
+        }
+      },
+      "outputPorts": {
+        "out": {
+          "link": 2
+        }
+      }
+    },
+    {
+      "type": "sinosc",
+      "_x": 757.0,
+      "_y": 169.5,
+      "_name": "",
+      "_color": -13154481,
+      "inputPorts": {
+        "freq": {
+          "mult": 1.0,
+          "bias": 0.0,
+          "link": 1
+        },
+        "phase": {
+          "mult": 1.0,
+          "bias": 0.0
+        },
+        "vol": {
+          "mult": 1.0,
+          "bias": 0.0,
+          "link": 2
+        },
+        "feedback": {
+          "mult": 1.0,
+          "bias": 0.0
+        }
+      },
+      "outputPorts": {
+        "out": {
+          "link": 3
+        }
+      }
+    }
+  ],
+  "io": {
+    "freq": 1,
+    "gate": 0,
+    "lchan": 3
+  }
+}
