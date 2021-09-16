@@ -10,7 +10,7 @@ object NodeDrawOptions {
     /**
      * Width of each node
      */
-    const val width = 200f
+    const val width = 150f
 
     /**
      * Vertical space between ports
@@ -86,8 +86,8 @@ enum class NodeType(
         "mixer", arrayOf(
             PortDescription("in1", 0f, true),
             PortDescription("in2", 0f, true),
-            PortDescription("in3", 0f, true),
-            PortDescription("in4", 0f, true),
+            PortDescription("mix1", 1f, true),
+            PortDescription("mix2", 1f, true),
             PortDescription("out", 0f, false),
         )
     ),
@@ -182,9 +182,9 @@ open class Node(
         drawOutlineRect(p)
 
         // title block rect
-        p.rect(0f, 0f, width, NodeDrawOptions.titleBlockHeight, 5f, 5f, 5f, 5f)
+        p.rect(0f, 0f, width, NodeDrawOptions.titleBlockHeight, 5f, 5f, 0f, 0f)
         p.fill((tintColor and 0xFFFFFF) or (NodeDrawOptions.tintAlpha shl 24))
-        p.rect(0f, 0f, width, NodeDrawOptions.titleBlockHeight, 5f, 5f, 5f, 5f)
+        p.rect(0f, 0f, width, NodeDrawOptions.titleBlockHeight, 5f, 5f, 0f, 0f)
 
         // Selected highlight overlay
         p.noStroke()
@@ -196,10 +196,10 @@ open class Node(
         p.textAlign(PApplet.CENTER, PApplet.TOP)
         p.fill(DrawOptions.nodeTitleColor)
         p.textSize(NodeDrawOptions.titleTextSize)
-        p.text(customName, width / 2f, 0f)
+        p.text(customName, width / 2f, 5f)
         p.fill(DrawOptions.uiColor)
         p.textSize(DrawOptions.textSize)
-        p.text(type.typeName, width / 2f, NodeDrawOptions.titleTextSize + 4f)
+        p.text(type.typeName, width / 2f, NodeDrawOptions.titleTextSize + 7f)
 
         ports.forEach {
             it.draw(p)
