@@ -3,6 +3,7 @@ package serde
 import editor.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 /**
  * Defines a collection of linked ports. Since any [InputPort] can only link to a single [OutputPort],
@@ -18,7 +19,7 @@ data class LinkDef(
  */
 @ExperimentalSerializationApi
 fun deserializePatch(json: String, windowWidth: Float): Pair<ArrayList<Node>, ArrayList<Link>> {
-    val patch = jsonFormatter.decodeFromString<Patch>(json)
+    val patch = Json.decodeFromString<Patch>(json)
 
     // start with pre-initialized intrinsic nodes
     val nodes: ArrayList<Node> = getIntrinsics(windowWidth)

@@ -6,6 +6,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+class ClientRequest(val update_patch: Patch)
+
+@Serializable
 class Patch(val nodes: Array<SerializeNode>, val io: IO)
 
 // TODO store a database of intrinsics somewhere, so this can be more generic

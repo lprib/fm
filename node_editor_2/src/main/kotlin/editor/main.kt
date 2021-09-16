@@ -1,7 +1,10 @@
 package editor
 
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import processing.core.PApplet
+import serde.ClientRequest
 import serde.deserializePatch
 import serde.serializePatch
 import java.io.File
@@ -45,6 +48,8 @@ val helpText = """
         E: (node) edit tint color, (port) edit mult value
         f: load patch from file
         F: save patch to file
+        p: send current patch to websocket server
+        P: reconnect with websocket server
         h: display this help
     """.trimIndent()
 
@@ -58,8 +63,10 @@ class Main : PApplet() {
         get() = nodes.asIterable().plus(links.asIterable())
     private var selection: SelectableObject? = null
     private var linkStartedPort: Port? = null
-    private val notify = NotificationQueue()
+    val notify = NotificationQueue()
     private val choose = JFileChooser()
+
+    private val serverConnection = WebsocketConnection(this, "ws://localhost:8080")
 
     override fun settings() {
         size(1400, 800)
@@ -71,6 +78,12 @@ class Main : PApplet() {
         nodes.addAll(getIntrinsics(width.toFloat()))
         val currentPath = System.getProperty("user.dir")
         choose.currentDirectory = File(currentPath)
+
+        try {
+            serverConnection.connect()
+        } catch (e: Exception) {
+            notify.send(this, "Could not connect to server")
+        }
     }
 
     override fun draw() {
@@ -109,6 +122,16 @@ class Main : PApplet() {
             'f' -> loadPatch()
             'F' -> savePatch()
             'h' -> notify.send(this, helpText, 10000)
+            'p' -> {
+                val req = ClientRequest(serializePatch(nodes, links))
+                val reqString = Json.encodeToString(req)
+                try {
+                    serverConnection.send(reqString)
+                } catch (e: Exception) {
+                    notify.send(this, "Error sending patch to server")
+                }
+            }
+            'P' -> reconnectToServer()
             ESC -> key = 0.toChar()
         }
     }
@@ -227,8 +250,16 @@ class Main : PApplet() {
         if (ret == JFileChooser.APPROVE_OPTION) {
             notify.send(this, "Saving patch to ${choose.selectedFile.name}")
             choose.selectedFile.bufferedWriter().use {
-                it.write(serializePatch(nodes, links))
+                it.write(Json.encodeToString(serializePatch(nodes, links)))
             }
+        }
+    }
+
+    private fun reconnectToServer() {
+        try {
+            serverConnection.reconnect()
+        } catch (e: Exception) {
+            notify.send(this, "Could not reconnect to server")
         }
     }
 }

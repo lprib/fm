@@ -2,18 +2,13 @@ package serde
 
 import editor.*
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-
-//val jsonFormatter = Json { prettyPrint = true }
-val jsonFormatter = Json
 
 /**
  * Return the JSON string specifying the given [nodes] and [links] graph structure.
  * The JSON will be serialized in accordance to the [Patch] structure.
  */
 @ExperimentalSerializationApi
-fun serializePatch(nodes: List<Node>, links: List<Link>): String {
+fun serializePatch(nodes: List<Node>, links: List<Link>): Patch {
     // contains the mapping from port to programState index identifier
     val allocations = hashMapOf<Port, Int>()
     // intermediate: used to generate new indices (they are indices into this arraylist)
@@ -37,8 +32,7 @@ fun serializePatch(nodes: List<Node>, links: List<Link>): String {
         rchan = linkValueFromIntrinsic(nodes, "rchan", allocations),
     )
 
-    val patch = Patch(serializedNodes.toTypedArray(), io)
-    return jsonFormatter.encodeToString(patch)
+    return Patch(serializedNodes.toTypedArray(), io)
 }
 
 /**
