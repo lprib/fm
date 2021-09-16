@@ -8,12 +8,15 @@
       unison program, so that when the last unison finishes, the thread sleeps.
     - [ ] When a voice is not active, the thread sleeps
 - [ ] Unison span input and unison support
-    - Add a pan left/right node to easily spread unison voices around the stereo field
+    - Add a pan left/right node to easily spread unison voices around the
+      stereo field
 - [ ] State based ADSR, ie. state = {Attacking, decaying, sustaining,
-  releasing, off}. Avoids discontinuities, allows other lerping behaviour (quadratic?)
+  releasing, off}. Avoids discontinuities, allows other lerping behaviour
+  (quadratic?)
 - [ ] Feedback implementation
-- [ ] Hotloading of programs... Watch for file change? or run http server to upload JSON?
-- [ ] Investigate frequency modulation increasing in effect over time
+- [ ] Hotloading of programs... Watch for file change? or run http server to
+  upload JSON?
+- [x] Investigate frequency modulation increasing in effect over time
 - [ ] Topological sort
 - [x] MIDI input
 - [ ] MIDI mod wheel input?
@@ -49,4 +52,5 @@
 - [x] crashes on 'cancel' for color and node name
 - [x] set working directory, patch browser?
 - [x] default value for node ports on initialization of node
-- [x] separate compilation into transformation from (Node, Link) to (Node) and JSON serializing (2 steps)
+- [x] separate compilation into transformation from (Node, Link) to (Node) and
+  JSON serializing (2 steps)

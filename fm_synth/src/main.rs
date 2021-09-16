@@ -10,8 +10,7 @@ use rodio::{OutputStream, Sink};
 fn main() {
     let (tx, rx) = channel();
 
-    let patch_str =
-        fs::read_to_string("../test.json").expect("couldnt read file");
+    let patch_str = fs::read_to_string("../test.json").expect("couldnt read file");
     let patch_def: PatchDefinition = serde_json::from_str(&patch_str).expect("couldnt parse");
     let patch = Patch::new(patch_def, rx);
 

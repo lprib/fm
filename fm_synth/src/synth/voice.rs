@@ -1,24 +1,26 @@
-use crate::synth::ProgramState;
+use std::fmt::Display;
 
 use super::{
     serialized::{DspNodeEnum, PatchDefinition, IO},
-    DspNode, SynthInputEvent,
+    DspNode, SynthInputEvent, SAMPLE_PERIOD,
 };
 
 pub struct Program {
     state: ProgramState,
     nodes: Vec<Box<dyn DspNode + Send>>,
     io: IO,
-    sample_rate: u32,
     // used for LR interlacing
     pending_sample: Option<f64>,
+}
+
+pub struct ProgramState {
+    pub links: Vec<f64>,
 }
 
 impl ProgramState {
     pub fn new(num_links: usize) -> Self {
         ProgramState {
             links: vec![0.0; num_links],
-            t: 0.0,
         }
     }
 }
@@ -41,7 +43,6 @@ impl Program {
             state: ProgramState::new(100),
             nodes: dyn_nodes,
             io: def.io.clone(),
-            sample_rate: 44100,
             pending_sample: None,
         }
     }
@@ -74,7 +75,6 @@ impl Program {
         for node in &mut self.nodes {
             node.next_sample(&mut self.state);
         }
-        self.state.t += 1.0 / self.sample_rate as f64;
 
         (
             self.io.lchan.map(|i| self.state.links[i]).unwrap_or(0.0),
@@ -82,6 +82,7 @@ impl Program {
         )
     }
 }
+
 impl Iterator for Program {
     type Item = f32;
 
@@ -96,5 +97,12 @@ impl Iterator for Program {
             self.pending_sample = Some(r);
             Some(l as f32)
         }
+    }
+}
+
+impl Display for Program {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // for node in &self.nodes {}
+        write!(f, "program TODO")
     }
 }

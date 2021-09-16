@@ -19,6 +19,10 @@ pub fn get_midi_input() -> Result<(MidiInput, MidiInputPort), String> {
             );
             in_ports.remove(0)
         }
+        2 => {
+            println!("Only two ports, assuming one as pass-through and chooseing the second");
+            in_ports.remove(1)
+        }
         _ => {
             println!("\nAvailable input ports:");
             for (i, p) in in_ports.iter().enumerate() {

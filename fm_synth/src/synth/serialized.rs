@@ -1,4 +1,4 @@
-use super::{adsr::Adsr, mixer::Mixer, sinosc::SinOsc, ProgramState};
+use super::{adsr::Adsr, mixer::Mixer, sinosc::SinOsc, voice::ProgramState};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Debug)]
@@ -29,7 +29,7 @@ pub struct IO {
     pub rchan: Option<usize>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 pub struct InPort {
     mult: f64,
     bias: f64,
@@ -37,26 +37,35 @@ pub struct InPort {
     link: Option<usize>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "lowercase")]
 pub struct OutPort {
     #[serde(skip_serializing_if = "Option::is_none")]
     link: Option<usize>,
 }
 
-impl InPort {
+// TODO move to ports module?
+pub trait Port {
+    fn read(&self, state: &ProgramState) -> f64;
+}
+
+impl Port for InPort {
     #[inline]
-    pub fn read(&self, state: &ProgramState) -> f64 {
+    fn read(&self, state: &ProgramState) -> f64 {
         match self.link {
             None => self.bias,
-            Some(i) => state.links[i] * self.mult + self.bias
+            Some(i) => state.links[i] * self.mult + self.bias,
         }
     }
 }
 
-impl Default for InPort {
-    fn default() -> Self {
-        Self { mult: 0.0, bias: 0.0, link: None }
+impl Port for OutPort {
+    #[inline]
+    fn read(&self, state: &ProgramState) -> f64 {
+        match self.link {
+            Some(idx) => state.links[idx],
+            None => Default::default(),
+        }
     }
 }
 
@@ -69,12 +78,6 @@ impl OutPort {
     }
 }
 
-impl Default for OutPort {
-    fn default() -> Self {
-        Self { link: None }
-    }
-}
-
 /// Define a node type with inputs, outputs, and fields. This automatically implements Deserialize.
 /// Syntax:
 /// ```
@@ -82,7 +85,9 @@ impl Default for OutPort {
 ///     #[OptionalAttribute1]
 ///     #[OptionalAttribute2]
 ///     NodeName(input1, input2 => output1, output2) {
+///         #[OptionalAttributeOrDocComment]
 ///         pub additionalField1: Type,
+///         #[OptionalAttributeOrDocComment]
 ///         additionalField2: Type
 ///     }
 /// }
@@ -90,10 +95,13 @@ impl Default for OutPort {
 /// The braced block with additional fields is optional.
 macro_rules! node_definition {
     (
-        $(#[$attribute:meta])*
+        $(#[$attribute:meta $($attributeArgs:tt)* ])*
         $structName:ident( $($inputName:ident),* => $($outputName:ident),*) $( {
             $(
+
+            $( #[ $fieldAttribute:meta $($fieldAttributeArgs:tt)* ] )*
             $fieldVisibility:vis $fieldName:ident: $fieldType:ty
+
             ),+
             // accept possible trailing comma
             $(,)?
@@ -101,11 +109,12 @@ macro_rules! node_definition {
     ) => {
         use serde::{Deserialize, de::Deserializer};
 
-        $(#[$attribute])*
+        $(#[$attribute $($attributeArgs)* ])*
         pub struct $structName {
             $( $inputName: InPort, )*
             $( $outputName: OutPort, )*
             $($(
+                $( #[ $fieldAttribute $($fieldAttributeArgs)* ] )*
                 $fieldVisibility $fieldName: $fieldType,
             )*)?
         }

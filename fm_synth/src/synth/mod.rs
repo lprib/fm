@@ -10,16 +10,17 @@ use std::{
     sync::mpsc::Receiver,
 };
 
-use self::{serialized::PatchDefinition, voice::Program};
+use self::{
+    serialized::PatchDefinition,
+    voice::{Program, ProgramState},
+};
 use rodio::Source;
+
+const SAMPLE_RATE: u32 = 44100;
+const SAMPLE_PERIOD: f64 = 1.0 / SAMPLE_RATE as f64;
 
 pub trait DspNode {
     fn next_sample(&mut self, state: &mut ProgramState);
-}
-
-pub struct ProgramState {
-    links: Vec<f64>,
-    t: f64,
 }
 
 #[derive(Debug)]
@@ -32,7 +33,6 @@ pub struct Patch {
     voices: Vec<Program>,
     voice_assignments: Vec<Option<u8>>,
     event_rx: Receiver<SynthInputEvent>,
-    sample_rate: u32,
 }
 
 impl Patch {
@@ -44,7 +44,6 @@ impl Patch {
                 .collect(),
             voice_assignments: repeat(None).take(num_voices).collect(),
             event_rx,
-            sample_rate: 44100,
         }
     }
 
@@ -97,7 +96,7 @@ impl Source for Patch {
     }
 
     fn sample_rate(&self) -> u32 {
-        self.sample_rate
+        SAMPLE_RATE
     }
 
     fn total_duration(&self) -> Option<std::time::Duration> {

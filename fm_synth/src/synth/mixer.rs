@@ -1,6 +1,7 @@
 use super::{
-    serialized::{InPort, OutPort},
-    DspNode, ProgramState,
+    serialized::{InPort, OutPort, Port},
+    voice::ProgramState,
+    DspNode,
 };
 
 node_definition! {
