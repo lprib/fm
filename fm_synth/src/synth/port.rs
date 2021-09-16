@@ -17,7 +17,6 @@ pub struct OutPort {
     link: Option<usize>,
 }
 
-// TODO move to ports module?
 pub trait Port {
     fn read(&self, state: &ProgramState) -> f64;
 }

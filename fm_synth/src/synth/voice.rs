@@ -90,10 +90,12 @@ impl Iterator for Program {
     fn next(&mut self) -> Option<Self::Item> {
         // Perform interlacing
         if let Some(samp) = self.pending_sample {
+            // If a sample was pending, send that out and perform no extra computation
             self.pending_sample = None;
             Some(samp as f32)
         } else {
-            // No pending sample, so generate
+            // No pending sample, so generate a new left/right pair.
+            // Send left immediately, store right in pending_sample
             let (l, r) = self.next_sample();
             self.pending_sample = Some(r);
             Some(l as f32)

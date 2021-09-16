@@ -35,6 +35,7 @@ macro_rules! node_definition {
     ) => {
         use serde::{Deserialize, de::Deserializer};
 
+        // ResolvedInputs is a struct with values corresponding to all InputPorts
         #[derive(Default, Debug, Clone)]
         struct ResolvedInputs {
             $( $inputName: f64, )*
@@ -52,6 +53,7 @@ macro_rules! node_definition {
         }
 
         impl $structName {
+            /// Read all input ports and store their results in self.resolved
             fn resolve_inputs(&mut self, state: &ProgramState) {
                 use crate::synth::port::Port;
                 $(

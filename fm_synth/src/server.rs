@@ -16,11 +16,14 @@ pub enum ClientRequest {
     RequestWaveform,
 }
 
+/// Create new websocket server in background thread. Will send deserialized `ClientRequest`s
+/// over the channel using `sender`.
 pub fn start_websocket_server(sender: Sender<ClientRequest>) {
     thread::spawn(move || {
         let server = TcpListener::bind((Ipv4Addr::LOCALHOST, 8080)).unwrap();
         for stream in server.incoming() {
             let sender = sender.clone();
+            // New thread for each client
             thread::spawn(move || {
                 let mut websocket = tungstenite::accept(stream.unwrap()).unwrap();
 
@@ -31,7 +34,7 @@ pub fn start_websocket_server(sender: Sender<ClientRequest>) {
                             sender.send(req).unwrap();
                             websocket
                                 .write_message(Message::Text(
-                                    "successfully recieved request".to_string(),
+                                    "successfully received request".to_string(),
                                 ))
                                 .unwrap();
                         } else {
