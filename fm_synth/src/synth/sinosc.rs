@@ -1,9 +1,11 @@
-use super::{
-    serialized::{InPort, OutPort},
-    voice::ProgramState,
-    DspNode, SAMPLE_PERIOD,
-};
 use std::f64::consts::PI;
+
+use crate::synth::dsp_node::DspNode;
+use crate::synth::port::{InPort, OutPort};
+
+use super::{
+    SAMPLE_PERIOD, voice::ProgramState,
+};
 
 node_definition! {
     #[derive(Default, Clone, Debug)]

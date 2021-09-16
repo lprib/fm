@@ -20,7 +20,7 @@ pub fn get_midi_input() -> Result<(MidiInput, MidiInputPort), String> {
             in_ports.remove(0)
         }
         2 => {
-            println!("Only two ports, assuming one as pass-through and chooseing the second");
+            println!("Only two ports, assuming one as pass-through and choosing the second");
             in_ports.remove(1)
         }
         _ => {
@@ -50,7 +50,6 @@ pub fn get_midi_input() -> Result<(MidiInput, MidiInputPort), String> {
 }
 
 pub fn parse_midi(bytes: &[u8]) -> Option<SynthInputEvent> {
-    println!("{:?}", bytes);
     if (bytes[0] & 0xF0) == 0x90 {
         Some(SynthInputEvent::KeyDown {
             key: bytes[1],

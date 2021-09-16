@@ -1,10 +1,8 @@
+use crate::synth::dsp_node::DspNode;
+use crate::synth::port::{InPort, OutPort};
 use crate::synth::SAMPLE_PERIOD;
 
-use super::{
-    serialized::{InPort, OutPort, Port},
-    voice::ProgramState,
-    DspNode,
-};
+use super::voice::ProgramState;
 
 node_definition! {
     #[derive(Default, Clone, Debug)]

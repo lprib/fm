@@ -1,12 +1,13 @@
-use crossbeam_channel::Sender;
-use serde::Deserialize;
 use std::{
     net::{Ipv4Addr, TcpListener},
     thread,
 };
+
+use crossbeam_channel::Sender;
+use serde::Deserialize;
 use tungstenite::Message;
 
-use crate::synth::serialized::PatchDefinition;
+use crate::synth::PatchDefinition;
 
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]

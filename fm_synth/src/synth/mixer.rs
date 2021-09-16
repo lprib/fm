@@ -1,8 +1,7 @@
-use super::{
-    serialized::{InPort, OutPort},
-    voice::ProgramState,
-    DspNode,
-};
+use crate::synth::dsp_node::DspNode;
+use crate::synth::port::{InPort, OutPort};
+
+use super::voice::ProgramState;
 
 node_definition! {
     #[derive(Default, Clone, Debug)]

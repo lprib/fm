@@ -10,7 +10,7 @@ use std::{
     time::Duration,
 };
 
-use crate::synth::{serialized::PatchDefinition, Patch};
+use crate::synth::Patch;
 use crossbeam_channel::unbounded;
 use midi::{get_midi_input, parse_midi};
 use rodio::{OutputStream, Sink, Source};
@@ -27,10 +27,9 @@ fn main() {
     let _connection = midi_in
         .connect(
             &port,
-            "test",
+            "fm_synth",
             move |_, message, _| {
                 if let Some(event) = parse_midi(message) {
-                    println!("sending {:?}", event);
                     synth_event_tx.send(event).unwrap();
                 }
             },
@@ -45,7 +44,7 @@ fn main() {
 
     while let Ok(req) = websocket_rx.recv() {
         if let ClientRequest::UpdatePatch(patchdef) = req {
-            dbg!(&patchdef);
+            println!("Recieved patch");
             let active_patch_number = active_patch_number.clone();
             active_patch_number.fetch_add(1, Ordering::SeqCst);
 
@@ -58,6 +57,7 @@ fn main() {
             .periodic_access(Duration::from_millis(100), move |src| {
                 // detect if this patch is stale and stop
                 if src.inner().index != active_patch_number.load(Ordering::SeqCst) {
+                    println!("Stopping patch {}", src.inner().index);
                     src.stop();
                 }
             });

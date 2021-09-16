@@ -1,25 +1,23 @@
-#[macro_use]
-pub mod serialized;
-pub mod adsr;
-pub mod mixer;
-pub mod sinosc;
-pub mod voice;
-
 use std::iter::{repeat, repeat_with};
 
-use self::{
-    serialized::PatchDefinition,
-    voice::{Program, ProgramState},
-};
 use crossbeam_channel::Receiver;
 use rodio::Source;
 
+pub use serialized::PatchDefinition;
+
+use self::voice::Program;
+
+#[macro_use]
+mod dsp_node;
+mod adsr;
+mod mixer;
+mod sinosc;
+mod port;
+mod voice;
+mod serialized;
+
 const SAMPLE_RATE: u32 = 44100;
 const SAMPLE_PERIOD: f64 = 1.0 / SAMPLE_RATE as f64;
-
-pub trait DspNode {
-    fn next_sample(&mut self, state: &mut ProgramState);
-}
 
 #[derive(Debug)]
 pub enum SynthInputEvent {
@@ -55,7 +53,6 @@ impl Patch {
                 if let Some(unused_voice_idx) = unused_voice_idx {
                     self.voices[unused_voice_idx].process_event(event);
                     self.voice_assignments[unused_voice_idx] = Some(key);
-                    println!("allocating voice {}", unused_voice_idx);
                 }
             }
             SynthInputEvent::KeyUp { key } => {
@@ -66,7 +63,6 @@ impl Patch {
                 if let Some(voice_idx) = voice_idx {
                     self.voices[voice_idx].process_event(event);
                     self.voice_assignments[voice_idx] = None;
-                    println!("releasing voice {}", voice_idx);
                 }
             }
         }

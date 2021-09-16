@@ -1,8 +1,9 @@
 use std::fmt::Display;
 
+use crate::synth::dsp_node::DspNode;
+
 use super::{
-    serialized::{DspNodeEnum, PatchDefinition, IO},
-    DspNode, SynthInputEvent, SAMPLE_PERIOD,
+    serialized::{DspNodeEnum, IO, PatchDefinition}, SynthInputEvent,
 };
 
 pub struct Program {
