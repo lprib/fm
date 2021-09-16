@@ -60,7 +60,7 @@ data class PortDescription(val name: String, val defaultBias: Float, val input: 
  * [typeName] is used in the JSON serde and used as the unique identifier for this type of node.
  */
 enum class NodeType(
-    val typeName: String, val ports: Array<PortDescription>, val customName: String = ""
+    val typeName: String, val ports: Array<PortDescription>
 ) {
     ADSR(
         "adsr",
@@ -93,10 +93,8 @@ enum class NodeType(
     ),
 
     // intrinsics
-    FREQ("freq", arrayOf(PortDescription("out", 0f, false)), "Note Frequency"),
-    GATE("gate", arrayOf(PortDescription("out", 0f, false)), "Note Gate"),
-    RCHAN("rchan", arrayOf(PortDescription("in", 0f, true)), "Left Channel"),
-    LCHAN("lchan", arrayOf(PortDescription("in", 0f, true)), "Right Channel");
+    INTRINSIC_IN("input", arrayOf(PortDescription("out", 0f, false))),
+    INTRINSIC_OUT("output", arrayOf(PortDescription("in", 0f, true)));
 
     companion object {
         fun fromName(name: String): NodeType? = values().find { it.typeName == name }
@@ -213,8 +211,8 @@ open class Node(
     }
 }
 
-class IntrinsicNode(type: NodeType, location: Vec2) :
-    Node(type, location, type.customName, DrawOptions.intrinsicTintColor) {
+class IntrinsicNode(type: NodeType, location: Vec2, customName: String) :
+    Node(type, location, customName, DrawOptions.intrinsicTintColor) {
     /**
      * Override the setter for [mouseSnapped] to do nothing.
      * The getter always returns false, so that the superclass implementation
@@ -240,8 +238,12 @@ class IntrinsicNode(type: NodeType, location: Vec2) :
  * [windowWidth] is required as some nodes will be right-justified to the window.
  */
 fun getIntrinsics(windowWidth: Float): ArrayList<Node> = arrayListOf(
-    IntrinsicNode(NodeType.FREQ, Vec2(20f, 20f)),
-    IntrinsicNode(NodeType.GATE, Vec2(20f, 120f)),
-    IntrinsicNode(NodeType.LCHAN, Vec2(windowWidth - NodeDrawOptions.width - 20f, 20f)),
-    IntrinsicNode(NodeType.RCHAN, Vec2(windowWidth - NodeDrawOptions.width - 20f, 120f)),
+    IntrinsicNode(NodeType.INTRINSIC_IN, Vec2(20f, 20f), "freq"),
+    IntrinsicNode(NodeType.INTRINSIC_IN, Vec2(20f, 120f), "gate"),
+    IntrinsicNode(
+        NodeType.INTRINSIC_OUT, Vec2(windowWidth - NodeDrawOptions.width - 20f, 20f), "lchan"
+    ),
+    IntrinsicNode(
+        NodeType.INTRINSIC_OUT, Vec2(windowWidth - NodeDrawOptions.width - 20f, 120f), "rchan"
+    ),
 )

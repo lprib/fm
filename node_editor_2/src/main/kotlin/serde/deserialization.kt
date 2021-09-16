@@ -25,11 +25,11 @@ fun deserializePatch(json: String, windowWidth: Float): Pair<ArrayList<Node>, Ar
     // This is used as an intermediate storage for links that may not have been fully parsed yet
     val linkLookup = hashMapOf<Int, LinkDef>()
 
-    // populate j
-    patch.io.freq?.let { createIntrinsicProducer(it, NodeType.FREQ, nodes, linkLookup) }
-    patch.io.gate?.let { createIntrinsicProducer(it, NodeType.GATE, nodes, linkLookup) }
-    patch.io.lchan?.let { createIntrinsicConsumer(it, NodeType.LCHAN, nodes, linkLookup) }
-    patch.io.rchan?.let { createIntrinsicConsumer(it, NodeType.RCHAN, nodes, linkLookup) }
+    // populate linkLookup with links to and from intrinsic nodes
+    patch.io.freq?.let { createIntrinsicProducer(it, "freq", nodes, linkLookup) }
+    patch.io.gate?.let { createIntrinsicProducer(it, "gate", nodes, linkLookup) }
+    patch.io.lchan?.let { createIntrinsicConsumer(it, "lchan", nodes, linkLookup) }
+    patch.io.rchan?.let { createIntrinsicConsumer(it, "rchan", nodes, linkLookup) }
 
     // Generate new nodes, and update the linkLookup structure along the way
     for (serializeNode in patch.nodes) {
@@ -70,26 +70,32 @@ fun deserializePatch(json: String, windowWidth: Float): Pair<ArrayList<Node>, Ar
 }
 
 /**
- * Update [linkLookup] data structure, such that the intrinsic node of [type] points to [linkIndex].
- * Node [type] must be a producer, i.e. it has a single output port.
+ * Update [linkLookup] data structure, such that the intrinsic node of [name] points to [linkIndex].
+ * Node [name] must be a producer, i.e. it has a single output port.
  */
 private fun createIntrinsicProducer(
     linkIndex: Int,
-    type: NodeType,
+    name: String,
     nodes: ArrayList<Node>,
     linkLookup: HashMap<Int, LinkDef>,
-) = linkLookup.setProducer(linkIndex, nodes.find { it.type == type }!!.outputPorts[0])
+) = linkLookup.setProducer(
+    linkIndex,
+    nodes.filterIsInstance<IntrinsicNode>().find { it.customName == name }!!.outputPorts[0]
+)
 
 /**
- * Update [linkLookup] data structure, such that the intrinsic node of [type] points to [linkIndex].
- * Node [type] must be a consumer, i.e. it has a single input port.
+ * Update [linkLookup] data structure, such that the intrinsic node of [name] points to [linkIndex].
+ * Node [name] must be a consumer, i.e. it has a single input port.
  */
 private fun createIntrinsicConsumer(
     linkIndex: Int,
-    type: NodeType,
+    name: String,
     nodes: ArrayList<Node>,
     linkLookup: HashMap<Int, LinkDef>,
-) = linkLookup.addConsumer(linkIndex, nodes.find { it.type == type }!!.inputPorts[0])
+) = linkLookup.addConsumer(
+    linkIndex,
+    nodes.filterIsInstance<IntrinsicNode>().find { it.customName == name }!!.inputPorts[0]
+)
 
 fun HashMap<Int, LinkDef>.addConsumer(idx: Int, port: InputPort) {
     this.getOrPut(idx) { LinkDef() }

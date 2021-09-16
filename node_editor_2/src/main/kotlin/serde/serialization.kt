@@ -31,10 +31,10 @@ fun serializePatch(nodes: List<Node>, links: List<Link>): String {
 
     val serializedNodes = nodes.filter { it !is IntrinsicNode }.map { it.toSerialized(allocations) }
     val io = IO(
-        freq = linkValueFromIntrinsic(nodes, NodeType.FREQ, allocations),
-        gate = linkValueFromIntrinsic(nodes, NodeType.GATE, allocations),
-        lchan = linkValueFromIntrinsic(nodes, NodeType.LCHAN, allocations),
-        rchan = linkValueFromIntrinsic(nodes, NodeType.RCHAN, allocations),
+        freq = linkValueFromIntrinsic(nodes, "freq", allocations),
+        gate = linkValueFromIntrinsic(nodes, "gate", allocations),
+        lchan = linkValueFromIntrinsic(nodes, "lchan", allocations),
+        rchan = linkValueFromIntrinsic(nodes, "rchan", allocations),
     )
 
     val patch = Patch(serializedNodes.toTypedArray(), io)
@@ -42,11 +42,12 @@ fun serializePatch(nodes: List<Node>, links: List<Link>): String {
 }
 
 /**
- * Find the intrinsic node of [type] in the list [nodes]. Get its link allocation index from the [allocations] map.
+ * Find the intrinsic node of [name] in the list [nodes]. Get its link allocation index from the [allocations] map.
  */
 private fun linkValueFromIntrinsic(
-    nodes: List<Node>, type: NodeType, allocations: HashMap<Port, Int>
-): Int? = allocations[nodes.find { it.type == type }?.ports?.first()]
+    nodes: List<Node>, name: String, allocations: HashMap<Port, Int>
+): Int? = allocations[nodes.filterIsInstance<IntrinsicNode>()
+    .find { it.customName == name }?.ports?.first()]
 
 fun InputPort.toSerialized(allocations: HashMap<Port, Int>): SerializeInPort =
     SerializeInPort(multValue, biasValue, allocations[this])
