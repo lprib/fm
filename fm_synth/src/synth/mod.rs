@@ -5,15 +5,13 @@ pub mod mixer;
 pub mod sinosc;
 pub mod voice;
 
-use std::{
-    iter::{repeat, repeat_with},
-    sync::mpsc::Receiver,
-};
+use std::iter::{repeat, repeat_with};
 
 use self::{
     serialized::PatchDefinition,
     voice::{Program, ProgramState},
 };
+use crossbeam_channel::Receiver;
 use rodio::Source;
 
 const SAMPLE_RATE: u32 = 44100;
@@ -33,17 +31,20 @@ pub struct Patch {
     voices: Vec<Program>,
     voice_assignments: Vec<Option<u8>>,
     event_rx: Receiver<SynthInputEvent>,
+    // number used to uniquely identify this patch
+    pub index: usize,
 }
 
 impl Patch {
-    pub fn new(def: PatchDefinition, event_rx: Receiver<SynthInputEvent>) -> Self {
-        let num_voices = 1;
+    pub fn new(def: PatchDefinition, event_rx: Receiver<SynthInputEvent>, index: usize) -> Self {
+        let num_voices = 9;
         Self {
             voices: repeat_with(|| Program::new(&def))
                 .take(num_voices)
                 .collect(),
             voice_assignments: repeat(None).take(num_voices).collect(),
             event_rx,
+            index,
         }
     }
 

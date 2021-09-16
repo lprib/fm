@@ -6,13 +6,13 @@ use super::{
 
 node_definition! {
     #[derive(Default, Clone, Debug)]
-    Mixer(in1, in2, in3, in4 => out)
+    Mixer(in1, in2, mix1, mix2 => out)
 }
 impl DspNode for Mixer {
     fn next_sample(&mut self, state: &mut ProgramState) {
         self.resolve_inputs(state);
         self.out.write(
-            self.resolved.in1 + self.resolved.in2 + self.resolved.in3 + self.resolved.in4,
+            self.resolved.in1 * self.resolved.mix1 + self.resolved.in2 * self.resolved.mix2,
             state,
         );
     }

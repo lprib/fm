@@ -10,11 +10,11 @@
 - [ ] Unison span input and unison support
     - Add a pan left/right node to easily spread unison voices around the
       stereo field
-- [ ] State based ADSR, ie. state = {Attacking, decaying, sustaining,
+- [x] State based ADSR, ie. state = {Attacking, decaying, sustaining,
   releasing, off}. Avoids discontinuities, allows other lerping behaviour
   (quadratic?)
 - [ ] Feedback implementation
-- [ ] Hotloading of programs... Watch for file change? or run http server to
+- [x] Hotloading of programs... Watch for file change? or run http server to
   upload JSON?
 - [x] Investigate frequency modulation increasing in effect over time
 - [ ] Topological sort

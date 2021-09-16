@@ -16,7 +16,7 @@ pub enum DspNodeEnum {
     Mixer(Mixer),
 }
 
-#[derive(Serialize, Deserialize, Default, Clone, Debug)]
+#[derive(Deserialize, Default, Clone, Debug)]
 #[serde(default)]
 pub struct IO {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -29,7 +29,7 @@ pub struct IO {
     pub rchan: Option<usize>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[derive(Deserialize, Clone, Debug, Default)]
 pub struct InPort {
     mult: f64,
     bias: f64,
@@ -37,7 +37,7 @@ pub struct InPort {
     link: Option<usize>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, Default)]
+#[derive(Deserialize, Clone, Debug, Default)]
 #[serde(rename_all = "lowercase")]
 pub struct OutPort {
     #[serde(skip_serializing_if = "Option::is_none")]
