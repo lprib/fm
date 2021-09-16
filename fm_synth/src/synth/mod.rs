@@ -37,7 +37,7 @@ pub struct Patch {
 
 impl Patch {
     pub fn new(def: PatchDefinition, event_rx: Receiver<SynthInputEvent>) -> Self {
-        let num_voices = 8;
+        let num_voices = 1;
         Self {
             voices: repeat_with(|| Program::new(&def))
                 .take(num_voices)

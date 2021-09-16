@@ -109,14 +109,29 @@ macro_rules! node_definition {
     ) => {
         use serde::{Deserialize, de::Deserializer};
 
+        #[derive(Default, Debug, Clone)]
+        struct ResolvedInputs {
+            $( $inputName: f64, )*
+        }
+
         $(#[$attribute $($attributeArgs)* ])*
         pub struct $structName {
+            resolved: ResolvedInputs,
             $( $inputName: InPort, )*
             $( $outputName: OutPort, )*
             $($(
                 $( #[ $fieldAttribute $($fieldAttributeArgs)* ] )*
                 $fieldVisibility $fieldName: $fieldType,
             )*)?
+        }
+
+        impl $structName {
+            fn resolve_inputs(&mut self, state: &ProgramState) {
+                use crate::synth::serialized::Port;
+                $(
+                    self.resolved.$inputName = self.$inputName.read(state);
+                )*
+            }
         }
 
         impl<'de> Deserialize<'de> for $structName {

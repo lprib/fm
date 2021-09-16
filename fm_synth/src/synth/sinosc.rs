@@ -1,5 +1,5 @@
 use super::{
-    serialized::{InPort, OutPort, Port},
+    serialized::{InPort, OutPort},
     voice::ProgramState,
     DspNode, SAMPLE_PERIOD,
 };
@@ -14,12 +14,10 @@ node_definition! {
 
 impl DspNode for SinOsc {
     fn next_sample(&mut self, state: &mut ProgramState) {
-        let vol = self.vol.read(state);
-        let freq = self.freq.read(state);
-        let phase = self.phase.read(state);
-
-        self.frequency_integral += freq * SAMPLE_PERIOD;
-        let out = vol * (2.0 * PI * self.frequency_integral + phase).sin();
+        self.resolve_inputs(state);
+        self.frequency_integral += self.resolved.freq * SAMPLE_PERIOD;
+        let out =
+            self.resolved.vol * (2.0 * PI * self.frequency_integral + self.resolved.phase).sin();
 
         self.out.write(out, state);
     }
