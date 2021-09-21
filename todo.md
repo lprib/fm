@@ -13,13 +13,17 @@
 - [x] State based ADSR, ie. state = {Attacking, decaying, sustaining,
   releasing, off}. Avoids discontinuities, allows other lerping behaviour
   (quadratic?)
-- [ ] Feedback implementation
+- [ ] Feedback implementation (See `topological sort`, is this necessary?)
 - [x] Hotloading of programs... Watch for file change? or run http server to
   upload JSON?
 - [x] Investigate frequency modulation increasing in effect over time
 - [ ] Topological sort
+  - [ ] Allow 'weak' links that are not included in topological sort, enabling
+    feedback loops. Weak links are able to incur a delay of X samples
+    (depending on how far back int he signal chain they loop).
 - [x] MIDI input
-- [ ] MIDI mod wheel input?
+- [ ] MIDI mod wheel input --> Allow adding macro inputs to synth patch, and
+  routing MIDI knobs to macros in the sequencer
 - [x] Detect long runs of DspNode that do not depend on anything else and run
   in parallel (WONT DO - run voicec in parallel instaed)
 - [x] Support for attenuation and DC offset on all port inputs and outputs
@@ -29,7 +33,7 @@
     - Auto DC bias mixer (ie +-1 to (0->1))
     - log to linear converter
     - square/saw oscillator, or consolidate into a single oscillator type
-    - Filters?
+    - FIR/IIR notch Filters?
 - [ ] Lower level compilation to remove all the indirection of
   port.read(state). Ie. reduce DspNodes to single functions which can be
   chained?
@@ -54,3 +58,6 @@
 - [x] default value for node ports on initialization of node
 - [x] separate compilation into transformation from (Node, Link) to (Node) and
   JSON serializing (2 steps)
+
+## General Architecture
+- [ ] Multiple patches, sequencer screen

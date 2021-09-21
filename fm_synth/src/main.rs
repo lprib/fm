@@ -1,7 +1,7 @@
 use std::{
     sync::{
-        Arc,
         atomic::{AtomicUsize, Ordering},
+        Arc,
     },
     time::Duration,
 };
@@ -10,7 +10,7 @@ use crossbeam_channel::unbounded;
 use rodio::{OutputStream, Sink, Source};
 
 use midi::{get_midi_input, parse_midi};
-use server::{ClientRequest, start_websocket_server};
+use server::{start_websocket_server, ClientRequest};
 
 use crate::synth::Patch;
 
@@ -59,8 +59,8 @@ fn main() {
                 synth_event_rx.clone(),
                 active_patch_number.load(Ordering::SeqCst),
             )
-                .stoppable()
-                .periodic_access(Duration::from_millis(100), move |src| {
+            .stoppable()
+            .periodic_access(Duration::from_millis(100), move |src| {
                 // detect if this patch is stale and stop
                 if src.inner().index != active_patch_number.load(Ordering::SeqCst) {
                     println!("Stopping patch {}", src.inner().index);

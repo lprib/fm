@@ -69,7 +69,7 @@ class Main : PApplet() {
     private val serverConnection = WebsocketConnection(this, "ws://localhost:8080")
 
     override fun settings() {
-        size(1400, 800)
+        size(1400, 800, P2D)
         smooth()
     }
 
